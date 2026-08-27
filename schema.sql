@@ -1,21 +1,58 @@
+SET FOREIGN_KEY_CHECKS = 0;
+
 -- =======================================================
--- Database Schema for Himachal News (news_db)
+-- Database Schema for News 24 Himachal
 -- Character Set: utf8mb4 (Full Unicode & Devanagari Hindi support)
 -- =======================================================
 
--- Drop existing tables in reverse dependency order
-SET FOREIGN_KEY_CHECKS = 0;
+-- Drop existing tables
 DROP TABLE IF EXISTS `notification_deliveries`;
+DROP TABLE IF EXISTS `bulletin_updates`;
 DROP TABLE IF EXISTS `manual_notifications`;
+DROP TABLE IF EXISTS `live_bulletins`;
 DROP TABLE IF EXISTS `subscribers`;
 DROP TABLE IF EXISTS `contacts`;
 DROP TABLE IF EXISTS `pages`;
 DROP TABLE IF EXISTS `news`;
 DROP TABLE IF EXISTS `categories`;
-SET FOREIGN_KEY_CHECKS = 1;
+DROP TABLE IF EXISTS `users`;
+DROP TABLE IF EXISTS `settings`;
 
 -- --------------------------------------------------------
--- Table: categories (Supports Parent & Child Categories)
+-- Table 1: users (Admins & Editors - Parent Table)
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `users` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(150) NOT NULL,
+    `username` VARCHAR(100) NOT NULL UNIQUE,
+    `email` VARCHAR(150) NOT NULL UNIQUE,
+    `password` VARCHAR(255) NOT NULL,
+    `role` ENUM('admin', 'editor') NOT NULL DEFAULT 'editor',
+    `designation` VARCHAR(150) DEFAULT 'संपादकीय प्रमुख',
+    `location` VARCHAR(150) DEFAULT 'शिमला, हिमाचल प्रदेश',
+    `avatar` VARCHAR(500) NULL,
+    `bio` TEXT NULL,
+    `social_twitter` VARCHAR(255) NULL,
+    `social_facebook` VARCHAR(255) NULL,
+    `status` ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX `idx_users_username` (`username`),
+    INDEX `idx_users_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- Table 2: settings (Key-Value System Settings)
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `settings` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `key` VARCHAR(100) NOT NULL UNIQUE,
+    `value` LONGTEXT NULL,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- Table 3: categories (Supports Parent & Child Categories)
 -- --------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `categories` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -30,7 +67,63 @@ CREATE TABLE IF NOT EXISTS `categories` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
--- Table: news (Articles)
+-- Table 4: pages (Static CMS Pages)
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `pages` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `title` VARCHAR(255) NOT NULL,
+    `slug` VARCHAR(150) NOT NULL UNIQUE,
+    `content` LONGTEXT NOT NULL,
+    `meta_description` VARCHAR(300) NULL,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- Table 5: contacts (Messages from contact form)
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `contacts` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(150) NOT NULL,
+    `email` VARCHAR(150) NOT NULL,
+    `phone` VARCHAR(30) NULL,
+    `subject` VARCHAR(255) NOT NULL,
+    `message` TEXT NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- Table 6: subscribers (Device-Based 1-Click Subscribers)
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `subscribers` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `device_id` VARCHAR(100) NOT NULL UNIQUE,
+    `device_type` VARCHAR(50) DEFAULT 'Desktop',
+    `device_name` VARCHAR(150) NULL,
+    `browser` VARCHAR(100) NULL,
+    `os` VARCHAR(100) NULL,
+    `ip_address` VARCHAR(50) NULL,
+    `user_agent` TEXT NULL,
+    `status` ENUM('active', 'inactive', 'unsubscribed') DEFAULT 'active',
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX `idx_sub_device` (`device_id`),
+    INDEX `idx_sub_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- Table 7: live_bulletins (Live Stream / YouTube Bulletin Embeds)
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `live_bulletins` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `title` VARCHAR(255) NOT NULL,
+    `video_url` VARCHAR(500) NOT NULL,
+    `is_live` TINYINT(1) DEFAULT 0,
+    `description` TEXT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- Table 8: news (Articles - Child Table of Categories)
 -- --------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `news` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -55,51 +148,7 @@ CREATE TABLE IF NOT EXISTS `news` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
--- Table: pages (Static CMS Pages)
--- --------------------------------------------------------
-CREATE TABLE IF NOT EXISTS `pages` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `title` VARCHAR(255) NOT NULL,
-    `slug` VARCHAR(150) NOT NULL UNIQUE,
-    `content` LONGTEXT NOT NULL,
-    `meta_description` VARCHAR(300) NULL,
-    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
--- Table: contacts (Messages from contact form)
--- --------------------------------------------------------
-CREATE TABLE IF NOT EXISTS `contacts` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `name` VARCHAR(150) NOT NULL,
-    `email` VARCHAR(150) NOT NULL,
-    `phone` VARCHAR(30) NULL,
-    `subject` VARCHAR(255) NOT NULL,
-    `message` TEXT NOT NULL,
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
--- Table: subscribers (Device-Based 1-Click Subscribers)
--- --------------------------------------------------------
-CREATE TABLE IF NOT EXISTS `subscribers` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `device_id` VARCHAR(100) NOT NULL UNIQUE,
-    `device_type` VARCHAR(50) DEFAULT 'Desktop',
-    `device_name` VARCHAR(150) NULL,
-    `browser` VARCHAR(100) NULL,
-    `os` VARCHAR(100) NULL,
-    `ip_address` VARCHAR(50) NULL,
-    `user_agent` TEXT NULL,
-    `status` ENUM('active', 'inactive', 'unsubscribed') DEFAULT 'active',
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX `idx_sub_device` (`device_id`),
-    INDEX `idx_sub_status` (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
--- Table: manual_notifications (Admin-Dispatched Push Alerts)
+-- Table 9: manual_notifications (Admin-Dispatched Push Alerts)
 -- --------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `manual_notifications` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -112,11 +161,12 @@ CREATE TABLE IF NOT EXISTS `manual_notifications` (
     `sent_by` VARCHAR(100) DEFAULT 'Admin',
     `recipient_count` INT DEFAULT 0,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT `fk_manual_notif_news` FOREIGN KEY (`news_id`) REFERENCES `news` (`id`) ON DELETE SET NULL,
     INDEX `idx_notif_created` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
--- Table: notification_deliveries (Tracking per device)
+-- Table 10: notification_deliveries (Tracking per device)
 -- --------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `notification_deliveries` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -125,7 +175,22 @@ CREATE TABLE IF NOT EXISTS `notification_deliveries` (
     `delivered_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `clicked_at` TIMESTAMP NULL DEFAULT NULL,
     UNIQUE KEY `uniq_dev_notif` (`notification_id`, `device_id`),
-    INDEX `idx_deliv_dev` (`device_id`)
+    INDEX `idx_deliv_dev` (`device_id`),
+    CONSTRAINT `fk_deliv_notif` FOREIGN KEY (`notification_id`) REFERENCES `manual_notifications` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- Table 11: bulletin_updates (Real-time Live Timeline Updates)
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `bulletin_updates` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `bulletin_id` INT NOT NULL,
+    `timestamp_label` VARCHAR(50) NOT NULL,
+    `headline` TEXT NOT NULL,
+    `badge_type` VARCHAR(50) DEFAULT 'breaking',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX (`bulletin_id`),
+    CONSTRAINT `fk_bulletin_updates_bulletin` FOREIGN KEY (`bulletin_id`) REFERENCES `live_bulletins` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =======================================================
@@ -393,27 +458,7 @@ INSERT INTO `news` (`category_id`, `subcategory_id`, `title`, `slug`, `excerpt`,
 (28, 35, 'पद्मश्री विद्यानंद सरैक: सिरमौर की हाटी लोक संस्कृति, पारंपरिक गीतों और नाटी को सहेजने वाले कर्मयोगी', 'vidyanand-saraik-padma-shri-hati-folk-culture-sirmaur', '6 दशकों से अधिक समय तक पहाड़ी लोक विधाओं के संरक्षण और शोध में अपना पूरा जीवन समर्पित कर दिया।', '<p><strong>नाहन (सिरमौर):</strong> विद्यानंद सरैक ने राष्ट्रपति भवन में पद्मश्री ग्रहण कर हिमाचल की लोक संस्कृति का मान बढ़ाया।</p>', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80', 'सांस्कृतिक कर्मवीर डेस्क', 2980, 0, 0, 0, NOW() - INTERVAL FLOOR(RAND()*72) HOUR),
 (28, 35, 'पद्मश्री चरनजीत सिंह: 1964 टोक्यो ओलंपिक में भारतीय हॉकी टीम को गोल्ड मेडल जिताने वाले महान कप्तान', 'charanjit-singh-hockey-legend-1964-tokyo-olympic-gold-captain', 'ऊना के मैहतपुर निवासी इस जांबाज मिडफील्डर ने पाकिस्तान को फाइनल में 1-0 से हराकर तिरंगा फहराया था।', '<p><strong>ऊना:</strong> भारतीय हॉकी के स्वर्णिम युग के सूत्रधार रहे चरनजीत सिंह का अनुशासन और खेल कौशल सदा स्मरणीय रहेगा।</p>', 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=800&q=80', 'खेल मनीषी डेस्क', 3120, 0, 0, 0, NOW() - INTERVAL FLOOR(RAND()*72) HOUR);
 
--- =======================================================
--- Tables: Live Bulletins & Real-time Live Timeline Updates
--- =======================================================
+-- Re-enable foreign key checks at the end of import
+SET FOREIGN_KEY_CHECKS = 1;
 
-CREATE TABLE IF NOT EXISTS `live_bulletins` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `title` VARCHAR(255) NOT NULL,
-    `video_url` VARCHAR(500) NOT NULL,
-    `is_live` TINYINT(1) DEFAULT 0,
-    `description` TEXT NULL,
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS `bulletin_updates` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `bulletin_id` INT NOT NULL,
-    `timestamp_label` VARCHAR(50) NOT NULL,
-    `headline` TEXT NOT NULL,
-    `badge_type` VARCHAR(50) DEFAULT 'breaking',
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    INDEX (`bulletin_id`),
-    CONSTRAINT `fk_bulletin_updates_bulletin` FOREIGN KEY (`bulletin_id`) REFERENCES `live_bulletins` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
