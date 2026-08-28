@@ -23,14 +23,14 @@ if (empty($_SESSION['admin_user'])) {
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
     $delId = (int)$_GET['id'];
     $pdo->prepare("DELETE FROM `contacts` WHERE `id` = ?")->execute([$delId]);
-    $_SESSION['flash_message'] = "संदेश (ID #{$delId}) को सफलतापूर्वक हटा दिया गया है।";
+    $_SESSION['flash_message'] = "Message (ID #{$delId}) deleted successfully.";
     $_SESSION['flash_type'] = "success";
     header("Location: /admin/messages.php");
     exit;
 }
 
-$adminTitle = 'संपर्क संदेश (Messages)';
-$adminHeading = 'संपर्क संदेश इनबॉक्स (Contact Messages Inbox)';
+$adminTitle = 'Contact Messages';
+$adminHeading = 'Contact Messages Inbox';
 
 require_once __DIR__ . '/includes/header.php';
 
@@ -41,7 +41,7 @@ $messages = $pdo->query("SELECT * FROM `contacts` ORDER BY `created_at` DESC")->
 <div class="panel">
     <div class="panel-header">
         <h2 class="panel-title">
-            <i class="fas fa-envelope-open-text"></i> प्राप्त संदेश (Total: <?= count($messages) ?>)
+            <i class="fas fa-envelope-open-text"></i> Received Messages (Total: <?= count($messages) ?>)
         </h2>
     </div>
     <div class="table-responsive">
@@ -49,12 +49,12 @@ $messages = $pdo->query("SELECT * FROM `contacts` ORDER BY `created_at` DESC")->
             <thead>
                 <tr>
                     <th style="width: 50px;">#</th>
-                    <th>प्रेषक (Sender)</th>
-                    <th>ईमेल एवं फोन</th>
-                    <th>विषय (Subject)</th>
-                    <th>संदेश (Message)</th>
-                    <th>दिनांक एवं समय</th>
-                    <th style="text-align: right;">कार्य</th>
+                    <th>Sender</th>
+                    <th>Email & Phone</th>
+                    <th>Subject</th>
+                    <th>Message</th>
+                    <th>Date & Time</th>
+                    <th style="text-align: right;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -62,7 +62,7 @@ $messages = $pdo->query("SELECT * FROM `contacts` ORDER BY `created_at` DESC")->
                     <tr>
                         <td colspan="7" style="text-align: center; color: var(--text-dim); padding: 40px;">
                             <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
-                            अभी तक कोई संपर्क संदेश प्राप्त नहीं हुआ है।
+                            No contact messages received yet.
                         </td>
                     </tr>
                 <?php else: ?>
@@ -91,10 +91,10 @@ $messages = $pdo->query("SELECT * FROM `contacts` ORDER BY `created_at` DESC")->
                             </td>
                             <td>
                                 <div class="action-btns" style="justify-content: flex-end;">
-                                    <a href="mailto:<?= sanitize($msg['email']) ?>?subject=Re: <?= urlencode($msg['subject']) ?>" class="btn-icon btn-icon-edit" title="उत्तर दें (Reply via Email)">
+                                    <a href="mailto:<?= sanitize($msg['email']) ?>?subject=Re: <?= urlencode($msg['subject']) ?>" class="btn-icon btn-icon-edit" title="Reply via Email">
                                         <i class="fas fa-reply"></i>
                                     </a>
-                                    <button type="button" class="btn-icon btn-icon-delete" title="हटाएं" onclick="confirmDelete('/admin/messages.php?action=delete&id=<?= $msg['id'] ?>', 'इस संदेश')">
+                                    <button type="button" class="btn-icon btn-icon-delete" title="Delete" onclick="confirmDelete('/admin/messages.php?action=delete&id=<?= $msg['id'] ?>', 'this message')">
                                         <i class="fas fa-trash-can"></i>
                                     </button>
                                 </div>

@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = trim($_POST['password'] ?? '');
 
     if (empty($loginInput) || empty($password)) {
-        $error = 'कृपया यूज़रनेम / ईमेल और पासवर्ड दर्ज करें।';
+        $error = 'Please enter username / email and password.';
     } else {
         try {
             $stmt = $pdo->prepare("
@@ -50,30 +50,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'email' => $user['email'],
                     'role' => $user['role'],
                     'avatar' => $user['avatar'] ?? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-                    'designation' => $user['designation'] ?? 'संपादक'
+                    'designation' => $user['designation'] ?? 'Editor'
                 ];
 
-                $_SESSION['flash_message'] = "स्वागत है, <strong>" . sanitize($displayName) . "</strong>! आप सफलतापूर्वक लॉगिन हो चुके हैं।";
+                $_SESSION['flash_message'] = "Welcome, <strong>" . sanitize($displayName) . "</strong>! You have successfully logged in.";
                 $_SESSION['flash_type'] = "success";
 
                 header("Location: index.php");
                 exit;
             } else {
-                $error = 'गलत यूज़रनेम या पासवर्ड! कृपया दोबारा जांचें।';
+                $error = 'Invalid username or password! Please check and try again.';
             }
         } catch (PDOException $e) {
-            $error = 'डेटाबेस त्रुटि: ' . $e->getMessage();
+            $error = 'Database Error: ' . $e->getMessage();
         }
     }
 }
 ?>
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <base href="/admin/">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>लॉगिन | एडमिन व रिपोर्टर पोर्टल - <?= sanitize($siteName) ?></title>
+    <title>Login | Admin & Reporter Portal - <?= sanitize($siteName) ?></title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -270,7 +270,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <i class="fas fa-newspaper"></i>
         </div>
         <h1><?= sanitize($siteName) ?></h1>
-        <p>एडमिन एवं संवाददाता कंट्रोल पैनल (Editor Portal)</p>
+        <p>Admin & Reporter Control Panel (Editor Portal)</p>
     </div>
 
     <div class="login-body">
@@ -283,17 +283,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <form method="POST" action="/admin/login.php" id="loginForm">
             <div class="form-group">
-                <label class="form-label" for="usernameInput">यूज़रनेम अथवा ईमेल आईडी</label>
+                <label class="form-label" for="usernameInput">Username or Email Address</label>
                 <div class="input-group">
                     <i class="fas fa-user"></i>
                     <input type="text" id="usernameInput" name="username" class="form-control" 
-                           placeholder="उदा: admin" required autofocus 
+                           placeholder="e.g. admin" required autofocus 
                            value="<?= isset($_POST['username']) ? sanitize($_POST['username']) : '' ?>">
                 </div>
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="passwordInput">पासवर्ड</label>
+                <label class="form-label" for="passwordInput">Password</label>
                 <div class="input-group">
                     <i class="fas fa-lock"></i>
                     <input type="password" id="passwordInput" name="password" class="form-control" 
@@ -302,14 +302,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <button type="submit" class="btn-submit">
-                <i class="fas fa-right-to-bracket"></i> लॉगिन करें (Login)
+                <i class="fas fa-right-to-bracket"></i> Login
             </button>
         </form>
     </div>
 
     <div class="login-footer">
         <a href="/index.php" target="_blank">
-            <i class="fas fa-arrow-left"></i> मुख्य न्यूज़ वेबसाइट पर जाएं
+            <i class="fas fa-arrow-left"></i> Go to Main News Website
         </a>
     </div>
 </div>

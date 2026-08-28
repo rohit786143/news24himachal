@@ -23,14 +23,14 @@ if ($userId > 0) {
     }
 }
 
-$adminTitle = $isEdit ? 'संपादक विवरण एडिट करें (Edit Editor)' : 'नया संपादक जोड़ें (Add Editor)';
-$adminHeading = $isEdit ? 'संपादक विवरण संपादित करें: ' . sanitize($user['name']) : 'नया संपादक / रिपोर्टर पंजीकृत करें';
+$adminTitle = $isEdit ? 'Edit Editor' : 'Add New Editor';
+$adminHeading = $isEdit ? 'Edit Editor: ' . sanitize($user['name']) : 'Register New Editor / Reporter';
 
 require_once __DIR__ . '/includes/header.php';
 
 // Only Admin can access this page
 if (!$isAdmin) {
-    $_SESSION['flash_message'] = "अनुमति अस्वीकृत: यह पेज केवल मुख्य एडमिन के लिए है।";
+    $_SESSION['flash_message'] = "Permission Denied: This page is accessible by Admin only.";
     $_SESSION['flash_type'] = "danger";
     header("Location: /admin/index.php");
     exit;
@@ -45,8 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = strtolower(trim($_POST['email'] ?? ''));
     $password = trim($_POST['password'] ?? '');
     $role = in_array($_POST['role'] ?? '', ['admin', 'editor']) ? $_POST['role'] : 'editor';
-    $designation = trim($_POST['designation'] ?? 'संवाददाता');
-    $location = trim($_POST['location'] ?? 'हिमाचल प्रदेश');
+    $designation = trim($_POST['designation'] ?? 'Reporter');
+    $location = trim($_POST['location'] ?? 'Himachal Pradesh');
     $avatar = trim($_POST['avatar'] ?? '');
     $bio = trim($_POST['bio'] ?? '');
     $twitter = trim($_POST['social_twitter'] ?? '');
@@ -62,15 +62,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($name) || empty($username) || empty($email)) {
-        $error = "कृपया नाम, यूज़रनेम और ईमेल आईडी अवश्य भरें।";
+        $error = "Please fill in Name, Username, and Email Address.";
     } elseif (!$isEdit && empty($password)) {
-        $error = "नए संपादक के लिए पासवर्ड दर्ज करना अनिवार्य है।";
+        $error = "Password is required for a new editor.";
     } else {
         // Check uniqueness of username and email
         $checkStmt = $pdo->prepare("SELECT id FROM `users` WHERE (`username` = ? OR `email` = ?) AND `id` != ?");
         $checkStmt->execute([$username, $email, $userId]);
         if ($checkStmt->fetch()) {
-            $error = "यह यूज़रनेम या ईमेल पहले से किसी अन्य खाते में उपयोग में है।";
+            $error = "This username or email address is already in use by another account.";
         } else {
             // Default avatar if empty
             if (empty($avatar)) {
@@ -108,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ]);
                     }
 
-                    $_SESSION['flash_message'] = "संपादक '<strong>" . sanitize($name) . "</strong>' का विवरण सफलतापूर्वक अपडेट कर दिया गया!";
+                    $_SESSION['flash_message'] = "Editor '<strong>" . sanitize($name) . "</strong>' updated successfully!";
                     $_SESSION['flash_type'] = "success";
                     header("Location: users.php");
                     exit;
@@ -128,13 +128,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $twitter, $facebook, $status
                     ]);
 
-                    $_SESSION['flash_message'] = "नया संपादक '<strong>" . sanitize($name) . "</strong>' सफलतापूर्वक पंजीकृत कर दिया गया!";
+                    $_SESSION['flash_message'] = "New editor '<strong>" . sanitize($name) . "</strong>' registered successfully!";
                     $_SESSION['flash_type'] = "success";
                     header("Location: users.php");
                     exit;
                 }
             } catch (PDOException $e) {
-                $error = "डेटाबेस त्रुटि: " . $e->getMessage();
+                $error = "Database error: " . $e->getMessage();
             }
         }
     }
@@ -155,40 +155,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div>
             <div class="panel">
                 <div class="panel-header">
-                    <h2 class="panel-title"><i class="fas fa-id-card"></i> संपादक व रिपोर्टर विवरण</h2>
+                    <h2 class="panel-title"><i class="fas fa-id-card"></i> Editor & Reporter Details</h2>
                 </div>
                 <div class="panel-body">
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                         <!-- Full Name -->
                         <div class="form-group">
-                            <label class="form-label" for="userName">पूरा नाम (Full Name / Pen Name) <span class="required">*</span></label>
+                            <label class="form-label" for="userName">Full Name / Pen Name <span class="required">*</span></label>
                             <input type="text" id="userName" name="name" class="form-control" 
                                    value="<?= sanitize($user['name'] ?? ($_POST['name'] ?? '')) ?>" 
-                                   placeholder="उदा: केलांग संवाददाता या रोहित कुमार" required>
+                                   placeholder="e.g. Keylong Reporter or Rohit Kumar" required>
                         </div>
 
                         <!-- Designation -->
                         <div class="form-group">
-                            <label class="form-label" for="userDesignation">पदनाम (Designation / Bureau)</label>
+                            <label class="form-label" for="userDesignation">Designation / Bureau</label>
                             <input type="text" id="userDesignation" name="designation" class="form-control" 
-                                   value="<?= sanitize($user['designation'] ?? ($_POST['designation'] ?? 'संपादकीय डेस्क • News 24 Himachal')) ?>" 
-                                   placeholder="उदा: केलांग संवाददाता • News 24 Himachal">
+                                   value="<?= sanitize($user['designation'] ?? ($_POST['designation'] ?? 'Editorial Desk • News 24 Himachal')) ?>" 
+                                   placeholder="e.g. Keylong Reporter • News 24 Himachal">
                         </div>
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                         <!-- Username -->
                         <div class="form-group">
-                            <label class="form-label" for="userUsername">लॉगिन यूज़रनेम (Username) <span class="required">*</span></label>
+                            <label class="form-label" for="userUsername">Login Username <span class="required">*</span></label>
                             <input type="text" id="userUsername" name="username" class="form-control" 
                                    value="<?= sanitize($user['username'] ?? ($_POST['username'] ?? '')) ?>" 
-                                   placeholder="उदा: kelang_editor" required>
+                                   placeholder="e.g. kelang_editor" required>
                         </div>
 
                         <!-- Email -->
                         <div class="form-group">
-                            <label class="form-label" for="userEmail">ईमेल आईडी (Email Address) <span class="required">*</span></label>
+                            <label class="form-label" for="userEmail">Email Address <span class="required">*</span></label>
                             <input type="email" id="userEmail" name="email" class="form-control" 
                                    value="<?= sanitize($user['email'] ?? ($_POST['email'] ?? '')) ?>" 
                                    placeholder="reporter@himachalnews24.com" required>
@@ -199,27 +199,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <!-- Password -->
                         <div class="form-group">
                             <label class="form-label" for="userPass">
-                                पासवर्ड (Password) <?= $isEdit ? '<span style="color:var(--text-muted); font-size:0.75rem;">(बदलना हो तभी भरें)</span>' : '<span class="required">*</span>' ?>
+                                Password <?= $isEdit ? '<span style="color:var(--text-muted); font-size:0.75rem;">(Leave blank to keep current)</span>' : '<span class="required">*</span>' ?>
                             </label>
                             <input type="password" id="userPass" name="password" class="form-control" 
-                                   placeholder="<?= $isEdit ? 'नया पासवर्ड डालें अन्यथा खाली छोड़ें' : 'सुरक्षित पासवर्ड' ?>" 
+                                   placeholder="<?= $isEdit ? 'Enter new password or leave blank' : 'Secure password' ?>" 
                                    <?= $isEdit ? '' : 'required' ?>>
                         </div>
 
                         <!-- Location -->
                         <div class="form-group">
-                            <label class="form-label" for="userLocation">ज़िला / स्थान (Location)</label>
+                            <label class="form-label" for="userLocation">District / Location</label>
                             <input type="text" id="userLocation" name="location" class="form-control" 
-                                   value="<?= sanitize($user['location'] ?? ($_POST['location'] ?? 'लाहौल-स्पीति, हिमाचल प्रदेश')) ?>" 
-                                   placeholder="उदा: लाहौल-स्पीति / शिमला / कांगड़ा">
+                                   value="<?= sanitize($user['location'] ?? ($_POST['location'] ?? 'Lahaul-Spiti, Himachal Pradesh')) ?>" 
+                                   placeholder="e.g. Lahaul-Spiti / Shimla / Kangra">
                         </div>
                     </div>
 
                     <!-- Bio -->
                     <div class="form-group">
-                        <label class="form-label" for="userBio">संपादक का परिचय (Author Bio / About)</label>
-                        <textarea id="userBio" name="bio" rows="4" class="form-control" placeholder="संवाददाता का संक्षिप्त पत्रकारिता परिचय एवं अनुभव..."><?= sanitize($user['bio'] ?? ($_POST['bio'] ?? '')) ?></textarea>
-                        <span class="form-hint">यह विवरण पाठक को खबर के अंदर लेखक की प्रोफाइल पर दिखेगा।</span>
+                        <label class="form-label" for="userBio">Author Bio / About</label>
+                        <textarea id="userBio" name="bio" rows="4" class="form-control" placeholder="Brief journalism background and experience..."><?= sanitize($user['bio'] ?? ($_POST['bio'] ?? '')) ?></textarea>
+                        <span class="form-hint">This description will be visible to readers on the author public profile page.</span>
                     </div>
 
                     <!-- Social Links -->
@@ -247,15 +247,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <!-- Save Button Card -->
             <div class="panel">
                 <div class="panel-header">
-                    <h2 class="panel-title"><i class="fas fa-floppy-disk"></i> कार्रवाई (Save)</h2>
+                    <h2 class="panel-title"><i class="fas fa-floppy-disk"></i> Actions</h2>
                 </div>
                 <div class="panel-body">
                     <button type="submit" class="topbar-btn" style="width: 100%; justify-content: center; padding: 12px; font-size: 1rem;">
-                        <i class="fas fa-check-circle"></i> <?= $isEdit ? 'अपडेट सुरक्षित करें' : 'संपादक जोड़ें (Create Editor)' ?>
+                        <i class="fas fa-check-circle"></i> <?= $isEdit ? 'Save Changes' : 'Create Editor' ?>
                     </button>
                     <div style="margin-top: 14px; text-align: center;">
                         <a href="/admin/users.php" style="color: var(--text-muted); font-size: 0.85rem; text-decoration: none;">
-                            <i class="fas fa-arrow-left"></i> वापस संपादक सूची पर जाएं
+                            <i class="fas fa-arrow-left"></i> Back to Editors List
                         </a>
                     </div>
                 </div>
@@ -264,33 +264,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <!-- Role & Status Box -->
             <div class="panel">
                 <div class="panel-header">
-                    <h2 class="panel-title"><i class="fas fa-shield-halved"></i> भूमिका एवं स्थिति</h2>
+                    <h2 class="panel-title"><i class="fas fa-shield-halved"></i> Role & Status</h2>
                 </div>
                 <div class="panel-body">
                     <div class="form-group">
-                        <label class="form-label" for="userRole">खाता प्रकार (Role)</label>
+                        <label class="form-label" for="userRole">Account Role</label>
                         <select name="role" id="userRole" class="form-control">
                             <option value="editor" <?= (($user['role'] ?? ($_POST['role'] ?? 'editor')) === 'editor') ? 'selected' : '' ?>>
-                                ✍️ संपादक / रिपोर्टर (Editor)
+                                ✍️ Editor / Reporter
                             </option>
                             <option value="admin" <?= (($user['role'] ?? ($_POST['role'] ?? 'editor')) === 'admin') ? 'selected' : '' ?>>
-                                👑 मुख्य एडमिन (Administrator)
+                                👑 Chief Admin
                             </option>
                         </select>
                         <span class="form-hint" style="margin-top: 4px;">
-                            <strong>संपादक:</strong> केवल अपनी पोस्ट जोड़/संपादित कर सकते हैं।<br>
-                            <strong>एडमिन:</strong> सभी सेटिंग्स, श्रेणियां व यूज़र्स नियंत्रित कर सकते हैं।
+                            <strong>Editor:</strong> Can add/edit their own articles.<br>
+                            <strong>Admin:</strong> Has full control over settings, categories, and users.
                         </span>
                     </div>
 
                     <div class="form-group" style="margin-bottom: 0;">
-                        <label class="form-label" for="userStatus">खाता स्थिति (Status)</label>
+                        <label class="form-label" for="userStatus">Account Status</label>
                         <select name="status" id="userStatus" class="form-control">
                             <option value="active" <?= (($user['status'] ?? ($_POST['status'] ?? 'active')) === 'active') ? 'selected' : '' ?>>
-                                🟢 सक्रिय (Active)
+                                🟢 Active
                             </option>
                             <option value="inactive" <?= (($user['status'] ?? ($_POST['status'] ?? 'active')) === 'inactive') ? 'selected' : '' ?>>
-                                🔴 निष्क्रिय (Inactive - लॉगिन बंद)
+                                🔴 Inactive (Login disabled)
                             </option>
                         </select>
                     </div>
@@ -300,7 +300,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <!-- Avatar Upload & Live Preview Box -->
             <div class="panel">
                 <div class="panel-header">
-                    <h2 class="panel-title"><i class="fas fa-image"></i> प्रोफाइल फोटो (Avatar)</h2>
+                    <h2 class="panel-title"><i class="fas fa-image"></i> Profile Avatar</h2>
                 </div>
                 <div class="panel-body text-center">
                     <?php 
@@ -315,17 +315,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <!-- Direct Device File Upload Input -->
                     <div class="form-group" style="text-align: left; margin-bottom: 16px;">
                         <label class="form-label" for="avatarFileInput" style="color: var(--text-heading); font-weight: 800;">
-                            <i class="fas fa-cloud-arrow-up" style="color: var(--primary);"></i> डिवाइस से फ़ोटो अपलोड करें
+                            <i class="fas fa-cloud-arrow-up" style="color: var(--primary);"></i> Upload Photo from Device
                         </label>
                         <input type="file" id="avatarFileInput" name="avatar_file" accept="image/*" class="form-control" 
                                style="padding: 8px 12px; cursor: pointer; border: 1.5px dashed var(--primary); background: #FEF2F2;"
                                onchange="previewEditorLocalImage(this, 'avatarImgPreview')">
-                        <span class="form-hint" style="color: var(--text-muted);">कंप्यूटर / मोबाइल से JPG, PNG फ़ोटो चुनें।</span>
+                        <span class="form-hint" style="color: var(--text-muted);">Select JPG or PNG image file from device.</span>
                     </div>
 
                     <!-- Optional URL Alternative -->
                     <div class="form-group" style="text-align: left; margin-bottom: 0; border-top: 1px dashed var(--border-color); padding-top: 12px;">
-                        <label class="form-label" for="avatarInput">अथवा फ़ोटो URL (Image Link)</label>
+                        <label class="form-label" for="avatarInput">Or Image URL</label>
                         <input type="url" id="avatarInput" name="avatar" class="form-control" 
                                value="<?= sanitize($currentAvatar) ?>" 
                                placeholder="https://..." oninput="document.getElementById('avatarImgPreview').src=this.value">

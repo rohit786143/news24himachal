@@ -4,8 +4,8 @@
  * Himachal News - Khabar 24
  */
 
-$adminTitle = 'पुश नोटिफिकेशन (Alerts)';
-$adminHeading = 'पुश नोटिफिकेशन सेंटर (Push Notification Center)';
+$adminTitle = 'Push Notifications';
+$adminHeading = 'Push Notification Center';
 
 require_once __DIR__ . '/includes/header.php';
 
@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $msgBody = trim($_POST['message'] ?? '');
     $url = trim($_POST['url'] ?? '');
     $imageUrl = trim($_POST['image_url'] ?? '');
-    $badgeText = trim($_POST['badge_text'] ?? 'ताज़ा खबर');
+    $badgeText = trim($_POST['badge_text'] ?? 'Latest News');
     $newsId = !empty($_POST['news_id']) ? (int)$_POST['news_id'] : null;
 
     if (!empty($title) && !empty($msgBody)) {
@@ -32,12 +32,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         ");
         $stmt->execute([$newsId, $title, $msgBody, $url, $imageUrl, $badgeText, $recipientCount]);
         
-        $_SESSION['flash_message'] = "नोटिफिकेशन सफलतापूर्वक <strong>{$recipientCount} सक्रिय डिवाइस(ओं)</strong> को भेज दिया गया!";
+        $_SESSION['flash_message'] = "Notification sent successfully to <strong>{$recipientCount} active device(s)</strong>!";
         $_SESSION['flash_type'] = "success";
         header("Location: /admin/notifications.php");
         exit;
     } else {
-        $error = "कृपया शीर्षक (Title) और संदेश (Message) दोनों भरें।";
+        $error = "Please fill in both Title and Message.";
     }
 }
 
@@ -74,7 +74,7 @@ $history = $pdo->query("
     <div>
         <div class="panel">
             <div class="panel-header">
-                <h2 class="panel-title"><i class="fas fa-paper-plane"></i> नया अलर्ट भेजें (Dispatch Push Alert)</h2>
+                <h2 class="panel-title"><i class="fas fa-paper-plane"></i> Dispatch Push Alert</h2>
             </div>
             <div class="panel-body">
                 <form method="POST" action="notifications.php">
@@ -83,17 +83,17 @@ $history = $pdo->query("
                     <!-- Quick Auto-Fill from Article -->
                     <div class="form-group">
                         <label class="form-label">
-                            <i class="fas fa-bolt" style="color: var(--accent-amber);"></i> प्रकाशित खबर से स्वतः भरें (Quick Fill from Post)
+                            <i class="fas fa-bolt" style="color: var(--accent-amber);"></i> Quick Fill from Published Post
                         </label>
                         <select id="newsAutoSelect" class="form-control" onchange="autoFillNotification(this)">
-                            <option value="">-- खबर चुनें जिससे विवरण लोड हो जाए --</option>
+                            <option value="">-- Select an article to auto-fill details --</option>
                             <?php foreach ($recentNews as $rn): ?>
                                 <option value="<?= $rn['id'] ?>" 
                                         data-title="<?= htmlspecialchars($rn['title'], ENT_QUOTES) ?>"
                                         data-excerpt="<?= htmlspecialchars($rn['excerpt'] ?? '', ENT_QUOTES) ?>"
                                         data-url="<?= (defined('APP_URL') ? APP_URL : 'https://news24hp.com') ?>/article.php?slug=<?= urlencode($rn['slug']) ?>"
                                         data-image="<?= htmlspecialchars($rn['image_url'], ENT_QUOTES) ?>"
-                                        data-cat="<?= htmlspecialchars($rn['category_name'] ?? 'ब्रेकिंग', ENT_QUOTES) ?>">
+                                        data-cat="<?= htmlspecialchars($rn['category_name'] ?? 'Breaking', ENT_QUOTES) ?>">
                                     [<?= sanitize($rn['category_name']) ?>] <?= sanitize(mb_substr($rn['title'], 0, 55)) ?>...
                                 </option>
                             <?php endforeach; ?>
@@ -105,23 +105,23 @@ $history = $pdo->query("
                     <!-- Title -->
                     <div class="form-group">
                         <label class="form-label" for="notifTitle">
-                            अलर्ट शीर्षक (Notification Title) <span class="required">*</span>
+                            Notification Title <span class="required">*</span>
                         </label>
-                        <input type="text" id="notifTitle" name="title" class="form-control" required placeholder="उदा: शिमला में भारी बर्फबारी, कुफरी-नारकंडा मार्ग बहाल...">
+                        <input type="text" id="notifTitle" name="title" class="form-control" required placeholder="e.g. Heavy snowfall in Shimla, Kufri-Narkanda road reopened...">
                     </div>
 
                     <!-- Message Body -->
                     <div class="form-group">
                         <label class="form-label" for="notifMsg">
-                            संदेश विवरण (Short Message Body) <span class="required">*</span>
+                            Short Message Body <span class="required">*</span>
                         </label>
-                        <textarea id="notifMsg" name="message" class="form-control" style="min-height: 80px;" required placeholder="उदा: प्रशासन ने पर्यटकों से सतर्कता बरतने की अपील की है..."></textarea>
+                        <textarea id="notifMsg" name="message" class="form-control" style="min-height: 80px;" required placeholder="e.g. Administration urges tourists to exercise caution..."></textarea>
                     </div>
 
                     <!-- Target URL -->
                     <div class="form-group">
                         <label class="form-label" for="notifUrl">
-                            टारगेट URL (क्लिक करने पर खुलने वाला लिंक)
+                            Target Destination URL (Link opened on click)
                         </label>
                         <input type="url" id="notifUrl" name="url" class="form-control" placeholder="<?= (defined('APP_URL') ? APP_URL : 'https://news24hp.com') ?>/article.php?slug=..." value="<?= (defined('APP_URL') ? APP_URL : 'https://news24hp.com') ?>">
                     </div>
@@ -129,19 +129,19 @@ $history = $pdo->query("
                     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
                         <!-- Image URL -->
                         <div class="form-group">
-                            <label class="form-label" for="notifImg">तस्वीर लिंक (Image URL)</label>
+                            <label class="form-label" for="notifImg">Image URL</label>
                             <input type="url" id="notifImg" name="image_url" class="form-control" placeholder="https://images.unsplash.com/...">
                         </div>
 
                         <!-- Badge Text -->
                         <div class="form-group">
-                            <label class="form-label" for="notifBadge">बैज टेक्स्ट</label>
-                            <input type="text" id="notifBadge" name="badge_text" class="form-control" value="ताज़ा खबर">
+                            <label class="form-label" for="notifBadge">Badge Text</label>
+                            <input type="text" id="notifBadge" name="badge_text" class="form-control" value="Latest News">
                         </div>
                     </div>
 
                     <button type="submit" class="topbar-btn" style="width: 100%; justify-content: center; padding: 12px; font-size: 1rem; margin-top: 10px;">
-                        <i class="fas fa-paper-plane"></i> तुरंत पुश अलर्ट भेजें (Dispatch Now)
+                        <i class="fas fa-paper-plane"></i> Dispatch Push Alert Now
                     </button>
                 </form>
             </div>
@@ -152,11 +152,11 @@ $history = $pdo->query("
     <div>
         <div class="panel">
             <div class="panel-header">
-                <h2 class="panel-title"><i class="fas fa-history"></i> भेजे गए अलर्ट्स का इतिहास (History)</h2>
+                <h2 class="panel-title"><i class="fas fa-history"></i> Notification History</h2>
             </div>
             <div class="panel-body" style="padding: 16px;">
                 <?php if (empty($history)): ?>
-                    <p style="text-align: center; color: var(--text-dim); padding: 30px;">अभी तक कोई नोटिफिकेशन नहीं भेजा गया है।</p>
+                    <p style="text-align: center; color: var(--text-dim); padding: 30px;">No notifications dispatched yet.</p>
                 <?php else: ?>
                     <div style="display: flex; flex-direction: column; gap: 14px;">
                         <?php foreach ($history as $h): ?>
@@ -176,7 +176,7 @@ $history = $pdo->query("
                                     <?= sanitize($h['message']) ?>
                                 </p>
                                 <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--text-dim); border-top: 1px solid var(--border-color); padding-top: 8px;">
-                                    <span><i class="fas fa-users"></i> प्राप्तकर्ता: <strong><?= $h['recipient_count'] ?> डिवाइस</strong></span>
+                                    <span><i class="fas fa-users"></i> Recipients: <strong><?= $h['recipient_count'] ?> devices</strong></span>
                                     <span><i class="fas fa-user-shield"></i> <?= sanitize($h['sent_by']) ?></span>
                                 </div>
                             </div>
@@ -200,7 +200,7 @@ function autoFillNotification(selectElem) {
         document.getElementById('notifMsg').value = opt.getAttribute('data-excerpt') || '';
         document.getElementById('notifUrl').value = opt.getAttribute('data-url') || '';
         document.getElementById('notifImg').value = opt.getAttribute('data-image') || '';
-        document.getElementById('notifBadge').value = opt.getAttribute('data-cat') || 'ताज़ा खबर';
+        document.getElementById('notifBadge').value = opt.getAttribute('data-cat') || 'Latest News';
     }
 }
 </script>

@@ -25,8 +25,8 @@ try {
             `email` VARCHAR(150) NOT NULL UNIQUE,
             `password` VARCHAR(255) NOT NULL,
             `role` ENUM('admin', 'editor') NOT NULL DEFAULT 'editor',
-            `designation` VARCHAR(150) DEFAULT 'संपादकीय प्रमुख',
-            `location` VARCHAR(150) DEFAULT 'शिमला, हिमाचल प्रदेश',
+            `designation` VARCHAR(150) DEFAULT 'Chief Editor',
+            `location` VARCHAR(150) DEFAULT 'Shimla, Himachal Pradesh',
             `avatar` VARCHAR(500) NULL,
             `bio` TEXT NULL,
             `social_twitter` VARCHAR(255) NULL,
@@ -40,17 +40,17 @@ try {
     ");
 
     // 2. Admin Credentials
-    $adminName = 'मुख्य संपादक (Chief Editor)';
+    $adminName = 'Chief Editor';
     $adminUsername = 'admin';
     $adminEmail = 'admin@news24hp.com';
     $adminPasswordPlain = 'admin123';
     $adminHash = password_hash($adminPasswordPlain, PASSWORD_BCRYPT);
-    $adminDesignation = 'संपादकीय प्रमुख (Chief Editor)';
+    $adminDesignation = 'Chief Editor';
 
     // 3. Insert or Update Admin Record
     $stmt = $pdo->prepare("
         INSERT INTO `users` (`name`, `username`, `email`, `password`, `role`, `designation`, `location`, `status`)
-        VALUES (?, ?, ?, ?, 'admin', ?, 'शिमला, हिमाचल प्रदेश', 'active')
+        VALUES (?, ?, ?, ?, 'admin', ?, 'Shimla, Himachal Pradesh', 'active')
         ON DUPLICATE KEY UPDATE 
             `password` = VALUES(`password`),
             `name` = VALUES(`name`),
@@ -64,11 +64,11 @@ try {
     ensureNavCategoriesConfigured($pdo);
 
     $isSuccess = true;
-    $message = "एडमिन खाता और होम नेविगेशन बार श्रेणियां सफलतापूर्वक तैयार (Configured) कर दी गई हैं!";
+    $message = "Admin account and navigation categories configured successfully!";
 
 } catch (PDOException $e) {
     $isSuccess = false;
-    $message = "डेटाबेस त्रुटि: " . $e->getMessage();
+    $message = "Database Error: " . $e->getMessage();
 }
 
 // If executed via CLI / Terminal
@@ -89,11 +89,11 @@ if (php_sapi_name() === 'cli') {
 }
 ?>
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>एडमिन क्रिएटर | News 24 Himachal</title>
+    <title>Admin Creator | News 24 Himachal</title>
     
     <!-- Google Fonts & FontAwesome -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Hind:wght@400;600;700&display=swap" rel="stylesheet">
@@ -277,7 +277,7 @@ if (php_sapi_name() === 'cli') {
     <div class="card-header">
         <i class="fas fa-shield-halved brand-icon"></i>
         <h1>News 24 Himachal</h1>
-        <p>व्यवस्थापक खाता सेटअप (Admin Account Setup)</p>
+        <p>Admin Account Setup</p>
     </div>
 
     <div class="card-body">
@@ -289,25 +289,25 @@ if (php_sapi_name() === 'cli') {
 
             <div class="cred-table">
                 <div class="cred-row">
-                    <span class="cred-label"><i class="fas fa-user"></i> यूज़रनेम (Username)</span>
+                    <span class="cred-label"><i class="fas fa-user"></i> Username</span>
                     <span class="cred-value">admin</span>
                 </div>
                 <div class="cred-row">
-                    <span class="cred-label"><i class="fas fa-key"></i> पासवर्ड (Password)</span>
+                    <span class="cred-label"><i class="fas fa-key"></i> Password</span>
                     <span class="cred-value">admin123</span>
                 </div>
                 <div class="cred-row">
-                    <span class="cred-label"><i class="fas fa-user-shield"></i> पद (Role)</span>
+                    <span class="cred-label"><i class="fas fa-user-shield"></i> Role</span>
                     <span class="cred-value" style="color: #16A34A;">Super Admin</span>
                 </div>
                 <div class="cred-row">
-                    <span class="cred-label"><i class="fas fa-envelope"></i> ईमेल (Email)</span>
+                    <span class="cred-label"><i class="fas fa-envelope"></i> Email</span>
                     <span class="cred-value" style="font-size: 0.85rem;">admin@news24hp.com</span>
                 </div>
             </div>
 
             <a href="/admin/login.php" class="btn-login">
-                <i class="fas fa-right-to-bracket"></i> एडमिन लॉगिन पेज पर जाएं
+                <i class="fas fa-right-to-bracket"></i> Go to Admin Login Page
             </a>
         <?php else: ?>
             <div class="status-box status-error">
@@ -318,7 +318,7 @@ if (php_sapi_name() === 'cli') {
     </div>
 
     <div class="card-footer">
-        सुरक्षा सलाह: लाइव सर्वर पर सेटअप पूर्ण होने के बाद इस स्क्रिप्ट को सुरक्षित रखें।
+        Security Notice: Keep this script secure after completing setup on production server.
     </div>
 </div>
 

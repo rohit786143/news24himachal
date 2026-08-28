@@ -31,7 +31,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
         $checkStmt = $pdo->prepare("SELECT id FROM `news` WHERE `id` = ? AND `author_id` = ?");
         $checkStmt->execute([$delId, $currentUserId]);
         if (!$checkStmt->fetch()) {
-            $_SESSION['flash_message'] = "त्रुटि: आप केवल अपनी प्रकाशित खबर ही हटा सकते हैं।";
+            $_SESSION['flash_message'] = "Error: You can only delete your own published posts.";
             $_SESSION['flash_type'] = "danger";
             header("Location: /admin/posts.php");
             exit;
@@ -39,14 +39,14 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
     }
     $stmt = $pdo->prepare("DELETE FROM `news` WHERE `id` = ?");
     $stmt->execute([$delId]);
-    $_SESSION['flash_message'] = "खबर (Article #{$delId}) को सफलतापूर्वक हटा दिया गया है।";
+    $_SESSION['flash_message'] = "Article (#{$delId}) deleted successfully.";
     $_SESSION['flash_type'] = "success";
     header("Location: /admin/posts.php");
     exit;
 }
 
-$adminTitle = $isEditor ? 'मेरी प्रकाशित खबरें (My Posts)' : 'सभी खबरें (All Posts)';
-$adminHeading = $isEditor ? 'मेरी प्रकाशित खबरें (My Published Articles)' : 'समाचार प्रबंधन (News Management)';
+$adminTitle = $isEditor ? 'My Published Posts' : 'All Posts';
+$adminHeading = $isEditor ? 'My Published Articles' : 'News Management';
 
 require_once __DIR__ . '/includes/header.php';
 
@@ -112,13 +112,13 @@ $allCats = $pdo->query("SELECT id, name, parent_id FROM `categories` ORDER BY pa
     <div class="panel-body" style="padding: 16px 20px;">
         <form method="GET" action="/admin/posts.php" style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
             <div style="flex-grow: 1; min-width: 250px; position: relative;">
-                <input type="text" name="q" value="<?= sanitize($search) ?>" placeholder="खबर का शीर्षक या लेखक खोजें..." class="form-control" style="padding-left: 36px;">
+                <input type="text" name="q" value="<?= sanitize($search) ?>" placeholder="Search article title or author..." class="form-control" style="padding-left: 36px;">
                 <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-dim);"></i>
             </div>
 
             <div style="min-width: 200px;">
                 <select name="category" class="form-control" onchange="this.form.submit()">
-                    <option value="">-- सभी श्रेणियां (All Categories) --</option>
+                    <option value="">-- All Categories --</option>
                     <?php foreach ($allCats as $cat): ?>
                         <option value="<?= $cat['id'] ?>" <?= $catFilter == $cat['id'] ? 'selected' : '' ?>>
                             <?= $cat['parent_id'] ? '&nbsp;&nbsp;&bull; ' : '📁 ' ?><?= sanitize($cat['name']) ?>
@@ -128,17 +128,17 @@ $allCats = $pdo->query("SELECT id, name, parent_id FROM `categories` ORDER BY pa
             </div>
 
             <button type="submit" class="topbar-btn" style="padding: 10px 18px;">
-                <i class="fas fa-filter"></i> फ़िल्टर करें
+                <i class="fas fa-filter"></i> Filter
             </button>
 
             <?php if (!empty($search) || !empty($catFilter)): ?>
                 <a href="/admin/posts.php" class="topbar-btn topbar-btn-secondary" style="padding: 10px 16px;">
-                    <i class="fas fa-rotate-left"></i> रीसेट
+                    <i class="fas fa-rotate-left"></i> Reset
                 </a>
             <?php endif; ?>
 
             <a href="/admin/post-edit.php" class="topbar-btn" style="margin-left: auto; background: var(--accent-green); border-color: var(--accent-green);">
-                <i class="fas fa-plus"></i> नई खबर जोड़ें
+                <i class="fas fa-plus"></i> Add New Post
             </a>
         </form>
     </div>
@@ -148,22 +148,22 @@ $allCats = $pdo->query("SELECT id, name, parent_id FROM `categories` ORDER BY pa
 <div class="panel">
     <div class="panel-header">
         <h2 class="panel-title">
-            <i class="fas fa-newspaper"></i> कुल <strong><?= number_format($totalPosts) ?></strong> खबरें उपलब्ध
+            <i class="fas fa-newspaper"></i> Total <strong><?= number_format($totalPosts) ?></strong> Articles Available
         </h2>
     </div>
     <div class="table-responsive">
         <table class="admin-table">
             <thead>
                 <tr>
-                    <th style="width: 70px;">फोटो</th>
-                    <th>शीर्षक (Article Title)</th>
-                    <th>श्रेणी (Category)</th>
+                    <th style="width: 70px;">Image</th>
+                    <th>Article Title</th>
+                    <th>Category</th>
                     <?php if (!$isEditor): ?>
-                        <th>लेखक (Author)</th>
+                        <th>Author</th>
                     <?php endif; ?>
-                    <th>व्यूज</th>
-                    <th>दिनांक</th>
-                    <th style="text-align: right;">कार्य</th>
+                    <th>Views</th>
+                    <th>Date</th>
+                    <th style="text-align: right;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -171,7 +171,7 @@ $allCats = $pdo->query("SELECT id, name, parent_id FROM `categories` ORDER BY pa
                     <tr>
                         <td colspan="<?= $isEditor ? '6' : '7' ?>" style="text-align: center; color: var(--text-dim); padding: 40px;">
                             <i class="fas fa-newspaper" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
-                            कोई खबर नहीं मिली। कृपया फ़िल्टर बदलें या <a href="/admin/post-edit.php" style="color: var(--accent-blue);">नई खबर जोड़ें</a>।
+                            No articles found. Please change filters or <a href="/admin/post-edit.php" style="color: var(--accent-blue);">add a new post</a>.
                         </td>
                     </tr>
                 <?php else: ?>
@@ -182,19 +182,19 @@ $allCats = $pdo->query("SELECT id, name, parent_id FROM `categories` ORDER BY pa
                             </td>
                             <td>
                                 <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-heading); margin-bottom: 4px; max-width: 380px;">
-                                    <a href="/article.php?slug=<?= urlencode($art['slug']) ?>" target="_blank" style="color: inherit; text-decoration: none;" title="वेबसाइट पर देखें">
+                                    <a href="/article.php?slug=<?= urlencode($art['slug']) ?>" target="_blank" style="color: inherit; text-decoration: none;" title="View Live Website">
                                         <?= sanitize($art['title']) ?>
                                     </a>
                                 </div>
                                 <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                                     <?php if ($art['is_breaking']): ?>
-                                        <span class="badge badge-red"><i class="fas fa-bolt"></i> ब्रेकिंग</span>
+                                        <span class="badge badge-red"><i class="fas fa-bolt"></i> Breaking</span>
                                     <?php endif; ?>
                                     <?php if ($art['is_featured']): ?>
-                                        <span class="badge badge-blue"><i class="fas fa-star"></i> सबसे बड़ी खबर</span>
+                                        <span class="badge badge-blue"><i class="fas fa-star"></i> Lead Story</span>
                                     <?php endif; ?>
                                     <?php if ($art['is_trending']): ?>
-                                        <span class="badge badge-green"><i class="fas fa-fire"></i> ट्रेंडिंग</span>
+                                        <span class="badge badge-green"><i class="fas fa-fire"></i> Trending</span>
                                     <?php endif; ?>
                                 </div>
                             </td>
@@ -214,7 +214,7 @@ $allCats = $pdo->query("SELECT id, name, parent_id FROM `categories` ORDER BY pa
                             </td>
                             <?php if (!$isEditor): ?>
                                 <td style="font-size: 0.85rem; color: var(--text-muted);">
-                                    <?= sanitize($art['author'] ?: 'संपादक') ?>
+                                    <?= sanitize($art['author'] ?: 'Editor') ?>
                                 </td>
                             <?php endif; ?>
                             <td>
@@ -225,13 +225,13 @@ $allCats = $pdo->query("SELECT id, name, parent_id FROM `categories` ORDER BY pa
                             </td>
                             <td>
                                 <div class="action-btns" style="justify-content: flex-end;">
-                                    <a href="/article.php?slug=<?= urlencode($art['slug']) ?>" target="_blank" class="btn-icon" title="लाइव देखें">
+                                    <a href="/article.php?slug=<?= urlencode($art['slug']) ?>" target="_blank" class="btn-icon" title="View Live">
                                         <i class="fas fa-external-link-alt"></i>
                                     </a>
-                                    <a href="/admin/post-edit.php?id=<?= $art['id'] ?>" class="btn-icon btn-icon-edit" title="संपादित करें">
+                                    <a href="/admin/post-edit.php?id=<?= $art['id'] ?>" class="btn-icon btn-icon-edit" title="Edit">
                                         <i class="fas fa-pen-to-square"></i>
                                     </a>
-                                    <button type="button" class="btn-icon btn-icon-delete" title="हटाएं" onclick="confirmDelete('/admin/posts.php?action=delete&id=<?= $art['id'] ?>', 'इस खबर')">
+                                    <button type="button" class="btn-icon btn-icon-delete" title="Delete" onclick="confirmDelete('/admin/posts.php?action=delete&id=<?= $art['id'] ?>', 'this article')">
                                         <i class="fas fa-trash-can"></i>
                                     </button>
                                 </div>
@@ -249,7 +249,7 @@ $allCats = $pdo->query("SELECT id, name, parent_id FROM `categories` ORDER BY pa
     <div style="display: flex; justify-content: center; gap: 8px; margin-top: 24px; flex-wrap: wrap;">
         <?php if ($page > 1): ?>
             <a href="/admin/posts.php?q=<?= urlencode($search) ?>&category=<?= urlencode($catFilter) ?>&page=<?= $page - 1 ?>" class="topbar-btn topbar-btn-secondary" style="padding: 6px 12px;">
-                &laquo; पिछला
+                &laquo; Previous
             </a>
         <?php endif; ?>
 
@@ -263,7 +263,7 @@ $allCats = $pdo->query("SELECT id, name, parent_id FROM `categories` ORDER BY pa
 
         <?php if ($page < $totalPages): ?>
             <a href="/admin/posts.php?q=<?= urlencode($search) ?>&category=<?= urlencode($catFilter) ?>&page=<?= $page + 1 ?>" class="topbar-btn topbar-btn-secondary" style="padding: 6px 12px;">
-                अगला &raquo;
+                Next &raquo;
             </a>
         <?php endif; ?>
     </div>

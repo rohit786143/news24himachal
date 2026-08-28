@@ -23,7 +23,7 @@ $currentUser = $_SESSION['admin_user'];
 $isAdmin = ($currentUser['role'] === 'admin');
 
 if (!$isAdmin) {
-    $_SESSION['flash_message'] = "अनुमति अस्वीकृत: लाइव बुलेटिन प्रबंधन केवल मुख्य एडमिन के लिए उपलब्ध है।";
+    $_SESSION['flash_message'] = "Permission Denied: Live bulletin management is accessible by Admin only.";
     $_SESSION['flash_type'] = "danger";
     header("Location: /admin/index.php");
     exit;
@@ -34,7 +34,7 @@ $activeBulletin = getActiveLiveBulletin($pdo);
 if (!$activeBulletin) {
     $pdo->exec("
         INSERT INTO `live_bulletins` (`title`, `video_url`, `is_live`, `description`, `created_at`)
-        VALUES ('हिमाचल लाइव ब्रेकिंग बुलेटिन: शिमला, मनाली, धर्मशाला से आज की सभी बड़ी खबरें', '', 1, 'देवभूमि हिमाचल प्रदेश का सबसे तेज़ व सटीक लाइव बुलेटिन।', NOW())
+        VALUES ('Himachal Live Breaking Bulletin: Latest Major Updates', '', 1, 'Fastest and most accurate live bulletin of Himachal Pradesh.', NOW())
     ");
     $activeBulletin = getActiveLiveBulletin($pdo);
 }
@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_bulletin'])) {
         ");
         $stmt->execute([$title, $isLive, $description, $bulletinId]);
 
-        $_SESSION['flash_message'] = "लाइव बुलेटिन हेडर सेटिंग्स सफलतापूर्वक अपडेट कर दी गईं!";
+        $_SESSION['flash_message'] = "Live bulletin header settings updated successfully!";
         $_SESSION['flash_type'] = "success";
         header("Location: /admin/live-bulletins.php");
         exit;
@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_bulletin'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_update'])) {
     $timeLabel = trim($_POST['timestamp_label'] ?? date('h:i A'));
     $headline = trim($_POST['headline'] ?? '');
-    $badgeType = trim($_POST['badge_type'] ?? 'अपडेट');
+    $badgeType = trim($_POST['badge_type'] ?? 'Update');
 
     if (!empty($headline)) {
         $stmt = $pdo->prepare("
@@ -77,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_update'])) {
         ");
         $stmt->execute([$bulletinId, $timeLabel, $headline, $badgeType]);
 
-        $_SESSION['flash_message'] = "नया लाइव टाइमलाइन अपडेट सबसे ऊपर जोड़ दिया गया!";
+        $_SESSION['flash_message'] = "New live timeline update added to top of feed!";
         $_SESSION['flash_type'] = "success";
         header("Location: /admin/live-bulletins.php");
         exit;
@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_edit_update'])) 
     $uId = (int)($_POST['update_id'] ?? 0);
     $timeLabel = trim($_POST['edit_timestamp_label'] ?? date('h:i A'));
     $headline = trim($_POST['edit_headline'] ?? '');
-    $badgeType = trim($_POST['edit_badge_type'] ?? 'अपडेट');
+    $badgeType = trim($_POST['edit_badge_type'] ?? 'Update');
 
     if ($uId > 0 && !empty($headline)) {
         $stmt = $pdo->prepare("
@@ -99,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_edit_update'])) 
         ");
         $stmt->execute([$timeLabel, $headline, $badgeType, $uId, $bulletinId]);
 
-        $_SESSION['flash_message'] = "टाइमलाइन अपडेट सफलतापूर्वक संशोधित (Updated) कर दिया गया!";
+        $_SESSION['flash_message'] = "Timeline update modified successfully!";
         $_SESSION['flash_type'] = "success";
         header("Location: /admin/live-bulletins.php");
         exit;
@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_edit_update'])) 
 if (isset($_GET['action']) && $_GET['action'] === 'delete_update' && isset($_GET['update_id'])) {
     $uId = (int)$_GET['update_id'];
     $pdo->prepare("DELETE FROM `bulletin_updates` WHERE `id` = ? AND `bulletin_id` = ?")->execute([$uId, $bulletinId]);
-    $_SESSION['flash_message'] = "टाइमलाइन अपडेट हटा दिया गया।";
+    $_SESSION['flash_message'] = "Timeline update deleted.";
     $_SESSION['flash_type'] = "success";
     header("Location: /admin/live-bulletins.php");
     exit;
@@ -119,7 +119,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete_update' && isset($_GET
 // 5. Clear All Timeline Updates
 if (isset($_GET['action']) && $_GET['action'] === 'clear_all') {
     $pdo->prepare("DELETE FROM `bulletin_updates` WHERE `bulletin_id` = ?")->execute([$bulletinId]);
-    $_SESSION['flash_message'] = "सभी टाइमलाइन अपडेट्स साफ़ (Cleared) कर दिए गए हैं।";
+    $_SESSION['flash_message'] = "All timeline updates cleared.";
     $_SESSION['flash_type'] = "success";
     header("Location: /admin/live-bulletins.php");
     exit;
@@ -136,8 +136,8 @@ if (isset($_GET['edit_id'])) {
 
 $updates = getBulletinUpdates($pdo, $bulletinId, 100);
 
-$adminTitle = 'लाइव बुलेटिन प्रबंधन (Live Bulletin)';
-$adminHeading = '🔴 लाइव बुलेटिन एवं टाइमलाइन प्रबंधन (Live Bulletin Manager)';
+$adminTitle = 'Live Bulletins';
+$adminHeading = '🔴 Live Bulletin & Timeline Management';
 
 require_once __DIR__ . '/includes/header.php';
 ?>
@@ -149,9 +149,9 @@ require_once __DIR__ . '/includes/header.php';
         <!-- Active Bulletin Header Settings -->
         <div class="panel">
             <div class="panel-header">
-                <h2 class="panel-title"><i class="fas fa-tower-broadcast" style="color: var(--primary-red);"></i> 1. लाइव बुलेटिन हेडर सेटिंग्स</h2>
+                <h2 class="panel-title"><i class="fas fa-tower-broadcast" style="color: var(--primary-red);"></i> 1. Live Bulletin Header Settings</h2>
                 <a href="/live-bulletin.php" target="_blank" style="color: #0284C7; font-size: 0.85rem; font-weight: 700; text-decoration: none;">
-                    <i class="fas fa-arrow-up-right-from-square"></i> लाइव पेज देखें
+                    <i class="fas fa-arrow-up-right-from-square"></i> View Live Page
                 </a>
             </div>
             <div class="panel-body">
@@ -159,7 +159,7 @@ require_once __DIR__ . '/includes/header.php';
                     <input type="hidden" name="save_bulletin" value="1">
 
                     <div class="form-group">
-                        <label class="form-label" for="bulletinTitle">बुलेटिन मुख्य शीर्षक (Headline Title) <span class="required">*</span></label>
+                        <label class="form-label" for="bulletinTitle">Bulletin Headline Title <span class="required">*</span></label>
                         <input type="text" id="bulletinTitle" name="title" class="form-control" 
                                value="<?= sanitize($activeBulletin['title']) ?>" required>
                     </div>
@@ -167,20 +167,20 @@ require_once __DIR__ . '/includes/header.php';
                     <div class="form-group" style="background: #FEF2F2; border: 1.5px solid #FECACA; padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 16px;">
                         <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 800; color: #991B1B; margin: 0;">
                             <input type="checkbox" name="is_live" value="1" <?= !empty($activeBulletin['is_live']) ? 'checked' : '' ?> style="width: 18px; height: 18px; cursor: pointer;">
-                            <span>🔴 'लाइव बुलेटिन' (LIVE) चालू रखें</span>
+                            <span>🔴 Keep 'LIVE BULLETIN' Active</span>
                         </label>
                         <span class="form-hint" style="color: #7F1D1D; margin-top: 4px; display: block;">
-                            वेबसाइट पर '🔴 LIVE BULLETIN' चमकता हुआ बैज दिखेगा।
+                            '🔴 LIVE BULLETIN' blinking badge will be displayed on the website.
                         </span>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="bulletinDesc">संक्षिप्त परिचय / विवरण (Description)</label>
+                        <label class="form-label" for="bulletinDesc">Short Description / Intro</label>
                         <textarea id="bulletinDesc" name="description" class="form-control" rows="4"><?= sanitize($activeBulletin['description'] ?? '') ?></textarea>
                     </div>
 
                     <button type="submit" class="topbar-btn" style="width: 100%; justify-content: center; padding: 12px;">
-                        <i class="fas fa-floppy-disk"></i> हेडर सेटिंग्स सेव करें
+                        <i class="fas fa-floppy-disk"></i> Save Header Settings
                     </button>
                 </form>
             </div>
@@ -189,16 +189,16 @@ require_once __DIR__ . '/includes/header.php';
         <!-- Timeline Reset Box -->
         <div class="panel" style="margin-top: 24px;">
             <div class="panel-header">
-                <h2 class="panel-title"><i class="fas fa-arrows-rotate"></i> टाइमलाइन प्रबंधन</h2>
+                <h2 class="panel-title"><i class="fas fa-arrows-rotate"></i> Timeline Management</h2>
             </div>
             <div class="panel-body">
                 <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 14px;">
-                    नया लाइव कवरेज शुरू करने के लिए आप पिछले सभी टाइमलाइन अपडेट्स को एक क्लिक में साफ़ कर सकते हैं।
+                    Clear all previous timeline updates with a single click to start a new live coverage.
                 </p>
                 <button type="button" class="topbar-btn topbar-btn-secondary" 
                         style="width: 100%; justify-content: center; color: #DC2626; border-color: #FECACA; background: #FEF2F2;"
-                        onclick="confirmDelete('/admin/live-bulletins.php?action=clear_all', 'सभी टाइमलाइन अपडेट्स साफ़ करने')">
-                    <i class="fas fa-trash-can"></i> संपूर्ण टाइमलाइन साफ़ करें (Reset)
+                        onclick="confirmDelete('/admin/live-bulletins.php?action=clear_all', 'all timeline updates')">
+                    <i class="fas fa-trash-can"></i> Clear Entire Timeline (Reset)
                 </button>
             </div>
         </div>
@@ -212,10 +212,10 @@ require_once __DIR__ . '/includes/header.php';
             <div class="panel" style="border: 2px solid #0284C7; box-shadow: 0 0 15px rgba(2, 132, 199, 0.15);">
                 <div class="panel-header" style="background: #E0F2FE;">
                     <h2 class="panel-title" style="color: #0369A1;">
-                        <i class="fas fa-pen-to-square"></i> टाइमलाइन अपडेट संशोधित करें (Edit Update #<?= $editingUpdate['id'] ?>)
+                        <i class="fas fa-pen-to-square"></i> Edit Timeline Update #<?= $editingUpdate['id'] ?>
                     </h2>
                     <a href="/admin/live-bulletins.php" class="topbar-btn topbar-btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;">
-                        <i class="fas fa-times"></i> रद्द करें
+                        <i class="fas fa-times"></i> Cancel
                     </a>
                 </div>
                 <div class="panel-body">
@@ -225,33 +225,33 @@ require_once __DIR__ . '/includes/header.php';
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
                             <div class="form-group" style="margin-bottom: 0;">
-                                <label class="form-label" for="editTimeInput">समय / टाइमस्टैम्प</label>
+                                <label class="form-label" for="editTimeInput">Time / Timestamp</label>
                                 <input type="text" id="editTimeInput" name="edit_timestamp_label" class="form-control" 
                                        value="<?= sanitize($editingUpdate['timestamp_label']) ?>" required>
                             </div>
                             <div class="form-group" style="margin-bottom: 0;">
-                                <label class="form-label" for="editBadgeSelect">कैटेगरी बैज</label>
+                                <label class="form-label" for="editBadgeSelect">Category Badge</label>
                                 <select id="editBadgeSelect" name="edit_badge_type" class="form-control">
-                                    <option value="बड़ी खबर" <?= $editingUpdate['badge_type'] === 'बड़ी खबर' ? 'selected' : '' ?>>🔴 बड़ी खबर</option>
-                                    <option value="अपडेट" <?= $editingUpdate['badge_type'] === 'अपडेट' ? 'selected' : '' ?>>🔵 ताज़ा अपडेट</option>
-                                    <option value="मौसम" <?= $editingUpdate['badge_type'] === 'मौसम' ? 'selected' : '' ?>>🟡 मौसम अलर्ट</option>
-                                    <option value="खेल" <?= $editingUpdate['badge_type'] === 'खेल' ? 'selected' : '' ?>>🟢 खेल समाचार</option>
-                                    <option value="सियासत" <?= $editingUpdate['badge_type'] === 'सियासत' ? 'selected' : '' ?>>🟣 सियासत</option>
+                                    <option value="Breaking News" <?= in_array($editingUpdate['badge_type'], ['Breaking News', 'बड़ी खबर']) ? 'selected' : '' ?>>🔴 Breaking News</option>
+                                    <option value="Latest Update" <?= in_array($editingUpdate['badge_type'], ['Latest Update', 'अपडेट']) ? 'selected' : '' ?>>🔵 Latest Update</option>
+                                    <option value="Weather Alert" <?= in_array($editingUpdate['badge_type'], ['Weather Alert', 'मौसम']) ? 'selected' : '' ?>>🟡 Weather Alert</option>
+                                    <option value="Sports News" <?= in_array($editingUpdate['badge_type'], ['Sports News', 'खेल']) ? 'selected' : '' ?>>🟢 Sports News</option>
+                                    <option value="Politics" <?= in_array($editingUpdate['badge_type'], ['Politics', 'सियासत']) ? 'selected' : '' ?>>🟣 Politics</option>
                                 </select>
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="editHeadlineInput">हेडलाइन विवरण <span class="required">*</span></label>
+                            <label class="form-label" for="editHeadlineInput">Headline Details <span class="required">*</span></label>
                             <textarea id="editHeadlineInput" name="edit_headline" class="form-control" rows="3" required><?= sanitize($editingUpdate['headline']) ?></textarea>
                         </div>
 
                         <div style="display: flex; gap: 10px;">
                             <button type="submit" class="topbar-btn" style="padding: 10px 24px;">
-                                <i class="fas fa-check"></i> बदलाव सेव करें
+                                <i class="fas fa-check"></i> Save Changes
                             </button>
                             <a href="/admin/live-bulletins.php" class="topbar-btn topbar-btn-secondary" style="padding: 10px 18px;">
-                                रद्द करें
+                                Cancel
                             </a>
                         </div>
                     </form>
@@ -261,7 +261,7 @@ require_once __DIR__ . '/includes/header.php';
             <!-- Fast Instant Timeline Poster -->
             <div class="panel">
                 <div class="panel-header" style="background: linear-gradient(135deg, #1E1B4B, #0F172A); color: #FFF;">
-                    <h2 class="panel-title" style="color: #FFF;"><i class="fas fa-bolt" style="color: #FDE047;"></i> 2. नया लाइव टाइमलाइन अपडेट भेजें (Top-Of-Feed)</h2>
+                    <h2 class="panel-title" style="color: #FFF;"><i class="fas fa-bolt" style="color: #FDE047;"></i> 2. Post New Live Timeline Update (Top-Of-Feed)</h2>
                 </div>
                 <div class="panel-body">
                     <form method="POST" action="/admin/live-bulletins.php">
@@ -269,30 +269,30 @@ require_once __DIR__ . '/includes/header.php';
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
                             <div class="form-group" style="margin-bottom: 0;">
-                                <label class="form-label" for="timeLabelInput">समय / टाइमस्टैम्प (Timestamp)</label>
+                                <label class="form-label" for="timeLabelInput">Time / Timestamp</label>
                                 <input type="text" id="timeLabelInput" name="timestamp_label" class="form-control" 
                                        value="<?= date('h:i A') ?>" required>
                             </div>
                             <div class="form-group" style="margin-bottom: 0;">
-                                <label class="form-label" for="badgeTypeSelect">कैटेगरी बैज (Badge Type)</label>
+                                <label class="form-label" for="badgeTypeSelect">Category Badge</label>
                                 <select id="badgeTypeSelect" name="badge_type" class="form-control">
-                                    <option value="बड़ी खबर" selected>🔴 बड़ी खबर</option>
-                                    <option value="अपडेट">🔵 ताज़ा अपडेट</option>
-                                    <option value="मौसम">🟡 मौसम अलर्ट</option>
-                                    <option value="खेल">🟢 खेल समाचार</option>
-                                    <option value="सियासत">🟣 सियासत</option>
+                                    <option value="Breaking News" selected>🔴 Breaking News</option>
+                                    <option value="Latest Update">🔵 Latest Update</option>
+                                    <option value="Weather Alert">🟡 Weather Alert</option>
+                                    <option value="Sports News">🟢 Sports News</option>
+                                    <option value="Politics">🟣 Politics</option>
                                 </select>
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="headlineInput">लाइव हेडलाइन / बुलेट विवरण <span class="required">*</span></label>
+                            <label class="form-label" for="headlineInput">Live Headline / Bullet Details <span class="required">*</span></label>
                             <textarea id="headlineInput" name="headline" class="form-control" rows="3" 
-                                      placeholder="उदा: शिमला-मनाली हाईवे पर ताजा बर्फबारी के बाद प्रशासन ने जारी की नई एडवाइजरी..." required></textarea>
+                                      placeholder="e.g. Administration issues fresh advisory following heavy snowfall on Shimla-Manali Highway..." required></textarea>
                         </div>
 
                         <button type="submit" class="topbar-btn" style="padding: 10px 24px; font-size: 0.95rem;">
-                            <i class="fas fa-paper-plane"></i> टाइमलाइन पर तुरंत पोस्ट करें &rarr;
+                            <i class="fas fa-paper-plane"></i> Post to Timeline Now &rarr;
                         </button>
                     </form>
                 </div>
@@ -303,25 +303,25 @@ require_once __DIR__ . '/includes/header.php';
         <div class="panel" style="margin-top: 24px;">
             <div class="panel-header">
                 <h2 class="panel-title">
-                    <i class="fas fa-list-ol"></i> 3. वर्तमान टाइमलाइन अपडेट्स (Total: <?= count($updates) ?>)
+                    <i class="fas fa-list-ol"></i> 3. Current Timeline Updates (Total: <?= count($updates) ?>)
                 </h2>
-                <span class="badge" style="background: #E0F2FE; color: #0284C7; font-size: 0.74rem;">नवीनतम ऊपर (Newest On Top)</span>
+                <span class="badge" style="background: #E0F2FE; color: #0284C7; font-size: 0.74rem;">Newest On Top</span>
             </div>
             <div class="table-responsive">
                 <table class="admin-table">
                     <thead>
                         <tr>
-                            <th style="width: 85px;">समय</th>
-                            <th style="width: 95px;">बैज</th>
-                            <th>हेडलाइन विवरण</th>
-                            <th style="width: 80px; text-align: center;">एक्शन</th>
+                            <th style="width: 85px;">Time</th>
+                            <th style="width: 100px;">Badge</th>
+                            <th>Headline Details</th>
+                            <th style="width: 80px; text-align: center;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($updates)): ?>
                             <tr>
                                 <td colspan="4" class="text-center py-4" style="color: var(--text-muted);">
-                                    कोई टाइमलाइन अपडेट मौजूद नहीं है। ऊपर दिए गए फॉर्म से पहला अपडेट पोस्ट करें।
+                                    No timeline updates present. Post the first update from the form above.
                                 </td>
                             </tr>
                         <?php else: ?>
@@ -340,12 +340,12 @@ require_once __DIR__ . '/includes/header.php';
                                     </td>
                                     <td class="text-center">
                                         <div style="display: flex; gap: 4px; justify-content: center;">
-                                            <a href="/admin/live-bulletins.php?edit_id=<?= $u['id'] ?>" class="btn-icon btn-icon-edit" title="संशोधित करें">
+                                            <a href="/admin/live-bulletins.php?edit_id=<?= $u['id'] ?>" class="btn-icon btn-icon-edit" title="Edit">
                                                 <i class="fas fa-pen"></i>
                                             </a>
                                             <button type="button" class="btn-icon btn-icon-delete" 
-                                                    title="हटाएं" 
-                                                    onclick="confirmDelete('/admin/live-bulletins.php?action=delete_update&update_id=<?= $u['id'] ?>', 'इस टाइमलाइन अपडेट')">
+                                                    title="Delete" 
+                                                    onclick="confirmDelete('/admin/live-bulletins.php?action=delete_update&update_id=<?= $u['id'] ?>', 'this timeline update')">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>

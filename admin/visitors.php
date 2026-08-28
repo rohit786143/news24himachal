@@ -11,8 +11,8 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../includes/functions.php';
 
-$adminTitle = 'दैनिक पाठक एवं विज़िटर एनालिटिक्स';
-$adminHeading = 'दैनिक पाठक एवं विज़िटर एनालिटिक्स (Site Visitors & Traffic)';
+$adminTitle = 'Site Visitors Analytics';
+$adminHeading = 'Daily Site Visitors & Traffic Analytics';
 
 require_once __DIR__ . '/includes/header.php';
 
@@ -138,27 +138,27 @@ $recentVisitors = $pdo->query("
         <!-- Preset Shortcuts -->
         <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
             <span style="font-size: 0.88rem; font-weight: 700; color: var(--text-heading); margin-right: 4px;">
-                <i class="fas fa-calendar-days" style="color: var(--primary);"></i> समय सीमा:
+                <i class="fas fa-calendar-days" style="color: var(--primary);"></i> Date Range:
             </span>
-            <a href="visitors.php?preset=today" class="topbar-btn <?= $preset === 'today' ? '' : 'topbar-btn-secondary' ?>" style="padding: 6px 12px; font-size: 0.82rem;">आज (Today)</a>
-            <a href="visitors.php?preset=yesterday" class="topbar-btn <?= $preset === 'yesterday' ? '' : 'topbar-btn-secondary' ?>" style="padding: 6px 12px; font-size: 0.82rem;">कल (Yesterday)</a>
-            <a href="visitors.php?preset=7days" class="topbar-btn <?= ($preset === '7days' || (!$preset && empty($_GET['start_date']))) ? '' : 'topbar-btn-secondary' ?>" style="padding: 6px 12px; font-size: 0.82rem;">पिछले 7 दिन</a>
-            <a href="visitors.php?preset=30days" class="topbar-btn <?= $preset === '30days' ? '' : 'topbar-btn-secondary' ?>" style="padding: 6px 12px; font-size: 0.82rem;">पिछले 30 दिन</a>
-            <a href="visitors.php?preset=this_month" class="topbar-btn <?= $preset === 'this_month' ? '' : 'topbar-btn-secondary' ?>" style="padding: 6px 12px; font-size: 0.82rem;">इस महीने</a>
+            <a href="visitors.php?preset=today" class="topbar-btn <?= $preset === 'today' ? '' : 'topbar-btn-secondary' ?>" style="padding: 6px 12px; font-size: 0.82rem;">Today</a>
+            <a href="visitors.php?preset=yesterday" class="topbar-btn <?= $preset === 'yesterday' ? '' : 'topbar-btn-secondary' ?>" style="padding: 6px 12px; font-size: 0.82rem;">Yesterday</a>
+            <a href="visitors.php?preset=7days" class="topbar-btn <?= ($preset === '7days' || (!$preset && empty($_GET['start_date']))) ? '' : 'topbar-btn-secondary' ?>" style="padding: 6px 12px; font-size: 0.82rem;">Last 7 Days</a>
+            <a href="visitors.php?preset=30days" class="topbar-btn <?= $preset === '30days' ? '' : 'topbar-btn-secondary' ?>" style="padding: 6px 12px; font-size: 0.82rem;">Last 30 Days</a>
+            <a href="visitors.php?preset=this_month" class="topbar-btn <?= $preset === 'this_month' ? '' : 'topbar-btn-secondary' ?>" style="padding: 6px 12px; font-size: 0.82rem;">This Month</a>
         </div>
 
         <!-- Custom Date Range Form Inputs -->
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <div style="display: flex; align-items: center; gap: 6px;">
-                <label style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">से:</label>
+                <label style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">From:</label>
                 <input type="date" name="start_date" class="form-control" value="<?= htmlspecialchars($startDate) ?>" style="padding: 6px 10px; font-size: 0.85rem; width: 140px;">
             </div>
             <div style="display: flex; align-items: center; gap: 6px;">
-                <label style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">तक:</label>
+                <label style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">To:</label>
                 <input type="date" name="end_date" class="form-control" value="<?= htmlspecialchars($endDate) ?>" style="padding: 6px 10px; font-size: 0.85rem; width: 140px;">
             </div>
             <button type="submit" class="topbar-btn" style="padding: 6px 14px; font-size: 0.85rem;">
-                <i class="fas fa-filter"></i> फ़िल्टर लागू करें
+                <i class="fas fa-filter"></i> Apply Filter
             </button>
         </div>
 
@@ -170,9 +170,9 @@ $recentVisitors = $pdo->query("
     
     <div class="stat-card">
         <div class="stat-info">
-            <h4>कुल पेज व्यूज (Page Views)</h4>
+            <h4>Total Page Views</h4>
             <div class="stat-number" style="color: var(--primary);"><?= number_format($totalViews) ?></div>
-            <span style="font-size: 0.78rem; color: var(--text-muted);">चुनी गई अवधि में कुल देखे गए पृष्ठ</span>
+            <span style="font-size: 0.78rem; color: var(--text-muted);">Total pages viewed in range</span>
         </div>
         <div class="stat-icon-wrap stat-icon-red">
             <i class="fas fa-eye"></i>
@@ -181,9 +181,9 @@ $recentVisitors = $pdo->query("
 
     <div class="stat-card">
         <div class="stat-info">
-            <h4>अद्वितीय विज़िटर्स (Unique Visitors)</h4>
+            <h4>Unique Visitors</h4>
             <div class="stat-number" style="color: #0284C7;"><?= number_format($uniqueVisitors) ?></div>
-            <span style="font-size: 0.78rem; color: var(--text-muted);">अलग-अलग IP / डिवाइस से आए पाठक</span>
+            <span style="font-size: 0.78rem; color: var(--text-muted);">Distinct readers by IP / device</span>
         </div>
         <div class="stat-icon-wrap stat-icon-blue">
             <i class="fas fa-users"></i>
@@ -192,9 +192,9 @@ $recentVisitors = $pdo->query("
 
     <div class="stat-card">
         <div class="stat-info">
-            <h4>मोबाइल ट्रैफ़िक (Mobile Share)</h4>
+            <h4>Mobile Share</h4>
             <div class="stat-number" style="color: #16A34A;"><?= $mobilePercent ?>%</div>
-            <span style="font-size: 0.78rem; color: var(--text-muted);"><?= number_format($mobileViews) ?> मोबाइल विज़िट्स</span>
+            <span style="font-size: 0.78rem; color: var(--text-muted);"><?= number_format($mobileViews) ?> mobile visits</span>
         </div>
         <div class="stat-icon-wrap stat-icon-green">
             <i class="fas fa-mobile-screen-button"></i>
@@ -203,9 +203,9 @@ $recentVisitors = $pdo->query("
 
     <div class="stat-card">
         <div class="stat-info">
-            <h4>डेस्कटॉप ट्रैफ़िक (Desktop Share)</h4>
+            <h4>Desktop Share</h4>
             <div class="stat-number" style="color: #D97706;"><?= $desktopPercent ?>%</div>
-            <span style="font-size: 0.78rem; color: var(--text-muted);"><?= number_format($desktopViews) ?> कंप्यूटर विज़िट्स</span>
+            <span style="font-size: 0.78rem; color: var(--text-muted);"><?= number_format($desktopViews) ?> desktop visits</span>
         </div>
         <div class="stat-icon-wrap stat-icon-amber">
             <i class="fas fa-desktop"></i>
@@ -221,18 +221,18 @@ $recentVisitors = $pdo->query("
     <div class="panel">
         <div class="panel-header">
             <h2 class="panel-title">
-                <i class="fas fa-calendar-day" style="color: var(--primary);"></i> दैनिक विज़िटर्स रिपोर्ट (<?= date('d M Y', strtotime($startDate)) ?> से <?= date('d M Y', strtotime($endDate)) ?>)
+                <i class="fas fa-calendar-day" style="color: var(--primary);"></i> Daily Visitors Report (<?= date('d M Y', strtotime($startDate)) ?> to <?= date('d M Y', strtotime($endDate)) ?>)
             </h2>
         </div>
         <div class="table-responsive">
             <table class="admin-table">
                 <thead>
                     <tr>
-                        <th>दिनांक (Date)</th>
-                        <th>अद्वितीय पाठक (Unique)</th>
-                        <th>कुल पेज व्यूज (Views)</th>
-                        <th>मोबाइल / डेस्कटॉप</th>
-                        <th style="width: 25%;">ट्रैफ़िक ग्राफ</th>
+                        <th>Date</th>
+                        <th>Unique Readers</th>
+                        <th>Page Views</th>
+                        <th>Mobile / Desktop</th>
+                        <th style="width: 25%;">Traffic Graph</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -240,8 +240,8 @@ $recentVisitors = $pdo->query("
                         <tr>
                             <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 35px;">
                                 <i class="fas fa-chart-line" style="font-size: 2.2rem; color: #CBD5E1; margin-bottom: 8px; display: block;"></i>
-                                इस दिनांक सीमा में अभी तक कोई विज़िट डेटा दर्ज नहीं हुआ है।<br>
-                                <small>जैसे ही विज़िटर्स लाइव साइट खोलेंगे, यहाँ तुरंत लाइव आंकड़े दिखने लगेंगे।</small>
+                                No visitor data recorded in this date range yet.<br>
+                                <small>As soon as visitors browse the live site, real-time statistics will appear here.</small>
                             </td>
                         </tr>
                     <?php else: ?>
@@ -259,7 +259,7 @@ $recentVisitors = $pdo->query("
                                 <td>
                                     <strong><?= $dayDateStr ?></strong>
                                     <?php if ($isTodayRow): ?>
-                                        <span class="badge badge-red" style="font-size: 0.65rem; margin-left: 4px;">आज (Today)</span>
+                                        <span class="badge badge-red" style="font-size: 0.65rem; margin-left: 4px;">Today</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
@@ -289,11 +289,11 @@ $recentVisitors = $pdo->query("
     <div>
         <div class="panel">
             <div class="panel-header">
-                <h2 class="panel-title"><i class="fas fa-compass" style="color: #0284C7;"></i> शीर्ष ब्राउज़र (Top Browsers)</h2>
+                <h2 class="panel-title"><i class="fas fa-compass" style="color: #0284C7;"></i> Top Browsers</h2>
             </div>
             <div class="panel-body">
                 <?php if (empty($topBrowsers)): ?>
-                    <p style="text-align: center; color: var(--text-muted); padding: 20px;">डेटा उपलब्ध नहीं है।</p>
+                    <p style="text-align: center; color: var(--text-muted); padding: 20px;">No data available.</p>
                 <?php else: ?>
                     <div style="display: flex; flex-direction: column; gap: 12px;">
                         <?php foreach ($topBrowsers as $b): ?>
@@ -319,9 +319,9 @@ $recentVisitors = $pdo->query("
         <div class="panel" style="margin-top: 20px; background: #F8FAFC; border: 1.5px solid var(--border-color);">
             <div class="panel-body" style="font-size: 0.84rem; color: var(--text-main); line-height: 1.6;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 700; color: var(--text-heading);">
-                    <i class="fas fa-shield-halved" style="color: #16A34A;"></i> लाइव ट्रैकिंग सक्रिय (Active)
+                    <i class="fas fa-shield-halved" style="color: #16A34A;"></i> Live Tracking Active
                 </div>
-                <p style="color: var(--text-muted);">जब भी कोई पाठक वेबसाइट, होमपेज या किसी भी खबर को पढ़ेगा, उसका विज़िट स्वतः दिनांक और डिवाइस के अनुसार यहाँ दर्ज हो जाएगा।</p>
+                <p style="color: var(--text-muted);">Whenever a reader browses the website or an article, their visit is automatically logged here with timestamp and device specs.</p>
             </div>
         </div>
     </div>
@@ -331,23 +331,23 @@ $recentVisitors = $pdo->query("
 <!-- Top Visited News Articles in Selected Date Range -->
 <div class="panel" style="margin-bottom: 24px;">
     <div class="panel-header">
-        <h2 class="panel-title"><i class="fas fa-fire" style="color: #D97706;"></i> सबसे अधिक पढ़ी गई खबरें (Most Popular Articles in Range)</h2>
+        <h2 class="panel-title"><i class="fas fa-fire" style="color: #D97706;"></i> Most Popular Articles in Range</h2>
     </div>
     <div class="table-responsive">
         <table class="admin-table">
             <thead>
                 <tr>
                     <th style="width: 60px;">#</th>
-                    <th>पेज / खबर का शीर्षक (Article Title & Link)</th>
-                    <th>अद्वितीय पाठक (Unique Visitors)</th>
-                    <th>कुल पेज व्यूज (Pageviews)</th>
+                    <th>Article Title & Link</th>
+                    <th>Unique Visitors</th>
+                    <th>Pageviews</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($topPages)): ?>
                     <tr>
                         <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">
-                            इस अवधि में अभी तक कोई पेज व्यू डेटा नहीं है।
+                            No pageview data in this date range yet.
                         </td>
                     </tr>
                 <?php else: ?>
@@ -371,7 +371,7 @@ $recentVisitors = $pdo->query("
                             </td>
                             <td>
                                 <span class="badge badge-red" style="font-weight: 800; font-size: 0.88rem;">
-                                    <?= number_format($tp['views_count']) ?> व्यूज
+                                    <?= number_format($tp['views_count']) ?> views
                                 </span>
                             </td>
                         </tr>
@@ -385,24 +385,24 @@ $recentVisitors = $pdo->query("
 <!-- Real-time Live Visitors Activity Log -->
 <div class="panel">
     <div class="panel-header">
-        <h2 class="panel-title"><i class="fas fa-tower-broadcast" style="color: var(--primary);"></i> हाल के लाइव विज़िटर्स (Recent 25 Live Visits)</h2>
+        <h2 class="panel-title"><i class="fas fa-tower-broadcast" style="color: var(--primary);"></i> Recent 25 Live Visits</h2>
     </div>
     <div class="table-responsive">
         <table class="admin-table">
             <thead>
                 <tr>
-                    <th>समय (Time)</th>
-                    <th>IP पता</th>
-                    <th>देखा गया पेज / खबर</th>
-                    <th>डिवाइस</th>
-                    <th>ब्राउज़र व OS</th>
+                    <th>Time</th>
+                    <th>IP Address</th>
+                    <th>Visited Page / Article</th>
+                    <th>Device</th>
+                    <th>Browser & OS</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($recentVisitors)): ?>
                     <tr>
                         <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 30px;">
-                            कोई हाल की विज़िट गतिविधि नहीं है।
+                            No recent visit activity.
                         </td>
                     </tr>
                 <?php else: ?>

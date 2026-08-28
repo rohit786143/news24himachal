@@ -22,8 +22,8 @@ if ($pageId > 0) {
     }
 }
 
-$adminTitle = $isEdit ? 'पेज संपादित करें: ' . ($pageData['title'] ?? '') : 'नया पेज जोड़ें';
-$adminHeading = $isEdit ? 'पेज सामग्री संपादन (Edit Page Content)' : 'नया CMS पेज बनाएं';
+$adminTitle = $isEdit ? 'Edit Page: ' . ($pageData['title'] ?? '') : 'Add New Page';
+$adminHeading = $isEdit ? 'Edit Page Content' : 'Create New CMS Page';
 
 $error = null;
 
@@ -35,9 +35,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $metaDescription = trim($_POST['meta_description'] ?? '');
 
     if (empty($title)) {
-        $error = "कृपया पेज का शीर्षक (Title) दर्ज करें।";
+        $error = "Please enter page title.";
     } elseif (empty($content)) {
-        $error = "कृपया पेज की सामग्री (Content) दर्ज करें।";
+        $error = "Please enter page content.";
     } else {
         if (empty($slug)) {
             $slug = slugify($title);
@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     WHERE `id` = ?
                 ");
                 $stmt->execute([$title, $slug, $content, $metaDescription, $pageId]);
-                $_SESSION['flash_message'] = "पेज '{$title}' की सामग्री सफलतापूर्वक अपडेट कर दी गई!";
+                $_SESSION['flash_message'] = "Page '{$title}' content updated successfully!";
                 $_SESSION['flash_type'] = "success";
                 header("Location: /admin/pages.php");
                 exit;
@@ -67,13 +67,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     VALUES (?, ?, ?, ?)
                 ");
                 $stmt->execute([$title, $slug, $content, $metaDescription]);
-                $_SESSION['flash_message'] = "नया पेज '{$title}' सफलतापूर्वक बना दिया गया!";
+                $_SESSION['flash_message'] = "New page '{$title}' created successfully!";
                 $_SESSION['flash_type'] = "success";
                 header("Location: /admin/pages.php");
                 exit;
             }
         } catch (PDOException $e) {
-            $error = "डेटाबेस त्रुटि: " . $e->getMessage();
+            $error = "Database Error: " . $e->getMessage();
         }
     }
 }
@@ -95,33 +95,33 @@ require_once __DIR__ . '/includes/header.php';
         <div>
             <div class="panel">
                 <div class="panel-header">
-                    <h2 class="panel-title"><i class="fas fa-file-pen"></i> पेज विवरण एवं मुख्य सामग्री</h2>
+                    <h2 class="panel-title"><i class="fas fa-file-pen"></i> Page Details & Main Content</h2>
                 </div>
                 <div class="panel-body">
                     
                     <!-- Page Title -->
                     <div class="form-group">
                         <label class="form-label" for="pageTitleInput">
-                            पेज का शीर्षक (Page Title) <span class="required">*</span>
+                            Page Title <span class="required">*</span>
                         </label>
                         <input type="text" id="pageTitleInput" name="title" class="form-control" style="font-size: 1.05rem; font-weight: 600;" 
-                               placeholder="उदा: हमारे बारे में (About Us)" 
+                               placeholder="e.g. About Us" 
                                value="<?= sanitize($pageData['title'] ?? ($_POST['title'] ?? '')) ?>" required>
                     </div>
 
                     <!-- Meta Description -->
                     <div class="form-group">
                         <label class="form-label" for="metaDescInput">
-                            मेटा विवरण (Meta Description for SEO)
+                            Meta Description (for SEO)
                         </label>
                         <textarea id="metaDescInput" name="meta_description" class="form-control" style="min-height: 60px;" 
-                                  placeholder="सर्च इंजन और सोशल शेयरिंग के लिए संक्षिप्त विवरण..."><?= sanitize($pageData['meta_description'] ?? ($_POST['meta_description'] ?? '')) ?></textarea>
+                                  placeholder="Short summary for search engines and social sharing..."><?= sanitize($pageData['meta_description'] ?? ($_POST['meta_description'] ?? '')) ?></textarea>
                     </div>
 
                     <!-- Rich Content with Quill Editor -->
                     <div class="form-group">
                         <label class="form-label">
-                            पेज की पूरी सामग्री (Full Page Content / HTML) <span class="required">*</span>
+                            Full Page Content (HTML) <span class="required">*</span>
                         </label>
                         <div class="quill-wrapper">
                             <div id="pageQuill" style="min-height: 380px;">
@@ -139,28 +139,28 @@ require_once __DIR__ . '/includes/header.php';
         <div>
             <div class="panel">
                 <div class="panel-header">
-                    <h2 class="panel-title"><i class="fas fa-floppy-disk"></i> सुरक्षित करें (Save Page)</h2>
+                    <h2 class="panel-title"><i class="fas fa-floppy-disk"></i> Save Page</h2>
                 </div>
                 <div class="panel-body">
                     
                     <!-- Slug -->
                     <div class="form-group">
                         <label class="form-label" for="pageSlugInput">
-                            URL स्लग (Slug) <span class="required">*</span>
+                            URL Slug <span class="required">*</span>
                         </label>
                         <input type="text" id="pageSlugInput" name="slug" class="form-control" 
                                placeholder="about, privacy-policy" 
                                value="<?= sanitize($pageData['slug'] ?? ($_POST['slug'] ?? '')) ?>" required>
-                        <span class="form-hint">वेबसाइट रूट पर URL बनेगा (उदा: about.php या page.php?slug=about)</span>
+                        <span class="form-hint">URL route on website root (e.g. about.php or page.php?slug=about)</span>
                     </div>
 
                     <button type="submit" class="topbar-btn" style="width: 100%; justify-content: center; padding: 12px; font-size: 1rem; margin-top: 10px;">
-                        <i class="fas fa-check-circle"></i> <?= $isEdit ? 'पेज अपडेट करें (Update Page)' : 'पेज बनाएं (Create Page)' ?>
+                        <i class="fas fa-check-circle"></i> <?= $isEdit ? 'Update Page' : 'Create Page' ?>
                     </button>
 
                     <div style="margin-top: 14px; text-align: center;">
                         <a href="/admin/pages.php" style="color: var(--text-dim); font-size: 0.85rem; text-decoration: none;">
-                            <i class="fas fa-arrow-left"></i> वापस सभी पेज पर जाएं
+                            <i class="fas fa-arrow-left"></i> Back to All Pages
                         </a>
                     </div>
                 </div>
@@ -170,7 +170,7 @@ require_once __DIR__ . '/includes/header.php';
             <?php if ($isEdit): ?>
                 <div class="panel">
                     <div class="panel-header">
-                        <h2 class="panel-title"><i class="fas fa-eye"></i> लाइव लिंक</h2>
+                        <h2 class="panel-title"><i class="fas fa-eye"></i> Live Link</h2>
                     </div>
                     <div class="panel-body">
                         <?php 
@@ -184,7 +184,7 @@ require_once __DIR__ . '/includes/header.php';
                         ?>
                         <a href="<?= $targetUrl ?>" target="_blank" class="view-site-btn">
                             <i class="fas fa-arrow-up-right-from-square"></i>
-                            <span>लाइव पेज देखें (<?= sanitize($pageData['title']) ?>)</span>
+                            <span>View Live Page (<?= sanitize($pageData['title']) ?>)</span>
                         </a>
                     </div>
                 </div>
@@ -217,7 +217,7 @@ const pageQuill = new Quill('#pageQuill', {
         toolbar: toolbarOptions
     },
     theme: 'snow',
-    placeholder: 'पेज की सामग्री यहाँ दर्ज करें (Bold, Italic, Justify, H1-H6, लिस्ट, कलर, इमेज आदि)...'
+    placeholder: 'Type page content here (Bold, Italic, Justify, H1-H6, Lists, Colors, Images etc)...'
 });
 
 const pageForm = document.getElementById('pageForm');

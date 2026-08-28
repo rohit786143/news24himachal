@@ -4,8 +4,8 @@
  * Himachal News - Khabar 24
  */
 
-$adminTitle = 'मेरी प्रोफाइल (My Profile)';
-$adminHeading = 'मेरी प्रोफाइल एवं खाता सेटिंग्स (My Account Profile)';
+$adminTitle = 'My Profile';
+$adminHeading = 'My Profile & Account Settings';
 
 require_once __DIR__ . '/includes/header.php';
 
@@ -17,7 +17,7 @@ $userStmt->execute([$currentUserId]);
 $user = $userStmt->fetch();
 
 if (!$user) {
-    echo '<div class="alert alert-danger">उपयोगकर्ता खाता नहीं मिला।</div>';
+    echo '<div class="alert alert-danger">User account not found.</div>';
     require_once __DIR__ . '/includes/footer.php';
     exit;
 }
@@ -46,19 +46,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $newPass = trim($_POST['new_password'] ?? '');
 
     if (empty($name) || empty($username) || empty($email)) {
-        $error = "कृपया नाम, यूज़रनेम और ईमेल आईडी दर्ज करें।";
+        $error = "Please enter full name, username and email address.";
     } else {
         // Check username and email uniqueness
         $dupCheck = $pdo->prepare("SELECT id FROM `users` WHERE (`email` = ? OR `username` = ?) AND `id` != ?");
         $dupCheck->execute([$email, $username, $currentUserId]);
         if ($dupCheck->fetch()) {
-            $error = "यह यूज़रनेम या ईमेल आईडी पहले से किसी अन्य खाते से जुड़ी है।";
+            $error = "This username or email ID is already linked with another account.";
         } else {
             try {
                 // If user wants to change password
                 if (!empty($newPass)) {
                     if (empty($currentPass) || !password_verify($currentPass, $user['password'])) {
-                        $error = "वर्तमान पासवर्ड (Current Password) गलत है। पासवर्ड नहीं बदला गया।";
+                        $error = "Current password is incorrect. Password was not changed.";
                     } else {
                         $passHash = password_hash($newPass, PASSWORD_BCRYPT);
                         $stmt = $pdo->prepare("
@@ -81,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $_SESSION['admin_user']['avatar'] = $avatar;
                         $_SESSION['admin_user']['designation'] = $designation;
 
-                        $_SESSION['flash_message'] = "आपकी प्रोफाइल, यूज़रनेम और पासवर्ड सफलतापूर्वक अपडेट कर दिए गए हैं!";
+                        $_SESSION['flash_message'] = "Your profile, username and password updated successfully!";
                         $_SESSION['flash_type'] = "success";
                         header("Location: profile.php");
                         exit;
@@ -107,13 +107,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['admin_user']['avatar'] = $avatar;
                     $_SESSION['admin_user']['designation'] = $designation;
 
-                    $_SESSION['flash_message'] = "आपकी प्रोफाइल एवं यूज़रनेम सफलतापूर्वक अपडेट कर दिया गया है!";
+                    $_SESSION['flash_message'] = "Your profile and username updated successfully!";
                     $_SESSION['flash_type'] = "success";
                     header("Location: profile.php");
                     exit;
                 }
             } catch (PDOException $e) {
-                $error = "डेटाबेस त्रुटि: " . $e->getMessage();
+                $error = "Database Error: " . $e->getMessage();
             }
         }
     }
@@ -133,50 +133,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div>
             <div class="panel">
                 <div class="panel-header">
-                    <h2 class="panel-title"><i class="fas fa-user-pen"></i> व्यक्तिगत एवं पत्रकारिता प्रोफ़ाइल</h2>
+                    <h2 class="panel-title"><i class="fas fa-user-pen"></i> Personal & Bureau Profile</h2>
                 </div>
                 <div class="panel-body">
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                         <div class="form-group">
-                            <label class="form-label" for="profileName">पूरा नाम (Author Name) <span class="required">*</span></label>
+                            <label class="form-label" for="profileName">Full Name (Author Name) <span class="required">*</span></label>
                             <input type="text" id="profileName" name="name" class="form-control" 
                                    value="<?= sanitize($user['name']) ?>" required>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="profileDesignation">पदनाम (Designation / Bureau)</label>
+                            <label class="form-label" for="profileDesignation">Designation / Bureau</label>
                             <input type="text" id="profileDesignation" name="designation" class="form-control" 
                                    value="<?= sanitize($user['designation']) ?>" 
-                                   placeholder="उदा: मुख्य संपादक • News 24 Himachal">
+                                   placeholder="e.g. Chief Editor • News 24 Himachal">
                         </div>
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                         <div class="form-group">
-                            <label class="form-label" for="profileUsername">लॉगिन यूज़रनेम (Username) <span class="required">*</span></label>
+                            <label class="form-label" for="profileUsername">Login Username <span class="required">*</span></label>
                             <input type="text" id="profileUsername" name="username" class="form-control" 
                                    value="<?= sanitize($user['username']) ?>" required>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="profileEmail">ईमेल आईडी (Email) <span class="required">*</span></label>
+                            <label class="form-label" for="profileEmail">Email Address <span class="required">*</span></label>
                             <input type="email" id="profileEmail" name="email" class="form-control" 
                                    value="<?= sanitize($user['email']) ?>" required>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="profileLocation">स्थान / ज़िला (Location)</label>
+                        <label class="form-label" for="profileLocation">Location / District</label>
                         <input type="text" id="profileLocation" name="location" class="form-control" 
                                value="<?= sanitize($user['location']) ?>" 
-                               placeholder="उदा: लाहौल-स्पीति, हिमाचल प्रदेश">
+                               placeholder="e.g. Lahaul-Spiti, Himachal Pradesh">
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="profileBio">संपादक परिचय (Biography)</label>
-                        <textarea id="profileBio" name="bio" rows="4" class="form-control" placeholder="अपने बारे में संक्षिप्त परिचय..."><?= sanitize($user['bio']) ?></textarea>
-                        <span class="form-hint">यह विवरण आपकी प्रकाशित खबरों में लेखक बॉक्स एवं आपकी प्रोफाइल पर पाठकों को दिखेगा।</span>
+                        <label class="form-label" for="profileBio">Author Biography</label>
+                        <textarea id="profileBio" name="bio" rows="4" class="form-control" placeholder="Brief introduction about yourself..."><?= sanitize($user['bio']) ?></textarea>
+                        <span class="form-hint">This bio appears in your published articles and on your public author profile.</span>
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
@@ -197,18 +197,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <!-- Password Change Section -->
                     <div style="border-top: 1.5px dashed var(--border-color); padding-top: 20px; margin-top: 10px;">
                         <h3 style="font-size: 1rem; color: var(--text-heading); margin-bottom: 12px; font-weight: 700;">
-                            <i class="fas fa-key" style="color: var(--primary);"></i> पासवर्ड बदलें (Change Password)
+                            <i class="fas fa-key" style="color: var(--primary);"></i> Change Password
                         </h3>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                             <div class="form-group">
-                                <label class="form-label" for="currPass">वर्तमान पासवर्ड (Current Password)</label>
+                                <label class="form-label" for="currPass">Current Password</label>
                                 <input type="password" id="currPass" name="current_password" class="form-control" placeholder="••••••••">
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label" for="newPass">नया पासवर्ड (New Password)</label>
-                                <input type="password" id="newPass" name="new_password" class="form-control" placeholder="नया पासवर्ड">
+                                <label class="form-label" for="newPass">New Password</label>
+                                <input type="password" id="newPass" name="new_password" class="form-control" placeholder="New Password">
                             </div>
                         </div>
                     </div>
@@ -221,15 +221,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div>
             <div class="panel">
                 <div class="panel-header">
-                    <h2 class="panel-title"><i class="fas fa-floppy-disk"></i> सुरक्षित करें</h2>
+                    <h2 class="panel-title"><i class="fas fa-floppy-disk"></i> Save Profile</h2>
                 </div>
                 <div class="panel-body">
                     <button type="submit" class="topbar-btn" style="width: 100%; justify-content: center; padding: 12px; font-size: 1rem;">
-                        <i class="fas fa-check-circle"></i> प्रोफाइल अपडेट करें
+                        <i class="fas fa-check-circle"></i> Update Profile
                     </button>
                     <div style="margin-top: 14px; text-align: center;">
                         <a href="/author.php?id=<?= $user['id'] ?>" target="_blank" style="color: #0284C7; font-size: 0.85rem; text-decoration: none; font-weight: 600;">
-                            <i class="fas fa-eye"></i> मेरी लाइव पब्लिक प्रोफाइल देखें
+                            <i class="fas fa-eye"></i> View My Live Public Profile
                         </a>
                     </div>
                 </div>
@@ -238,7 +238,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <!-- Avatar Upload & Live Preview Card -->
             <div class="panel">
                 <div class="panel-header">
-                    <h2 class="panel-title"><i class="fas fa-camera"></i> प्रोफ़ाइल फ़ोटो (Photo)</h2>
+                    <h2 class="panel-title"><i class="fas fa-camera"></i> Profile Photo</h2>
                 </div>
                 <div class="panel-body text-center">
                     <div style="margin-bottom: 16px; position: relative; display: inline-block;">
@@ -250,17 +250,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <!-- Direct Device File Upload Input -->
                     <div class="form-group" style="text-align: left; margin-bottom: 16px;">
                         <label class="form-label" for="avatarFileInput" style="color: var(--text-heading); font-weight: 800;">
-                            <i class="fas fa-cloud-arrow-up" style="color: var(--primary);"></i> डिवाइस से फ़ोटो अपलोड करें
+                            <i class="fas fa-cloud-arrow-up" style="color: var(--primary);"></i> Upload Photo from Device
                         </label>
                         <input type="file" id="avatarFileInput" name="avatar_file" accept="image/*" class="form-control" 
                                style="padding: 8px 12px; cursor: pointer; border: 1.5px dashed var(--primary); background: #FEF2F2;"
                                onchange="previewLocalImage(this, 'profileAvatarPreview')">
-                        <span class="form-hint" style="color: var(--text-muted);">कंप्यूटर / मोबाइल से JPG, PNG, WEBP फ़ोटो चुनें।</span>
+                        <span class="form-hint" style="color: var(--text-muted);">Select JPG, PNG, or WEBP photo from computer / mobile.</span>
                     </div>
 
                     <!-- Optional URL Alternative -->
                     <div class="form-group" style="text-align: left; margin-bottom: 0; border-top: 1px dashed var(--border-color); padding-top: 12px;">
-                        <label class="form-label" for="profileAvatar">अथवा फ़ोटो URL (Image Link)</label>
+                        <label class="form-label" for="profileAvatar">Or Image URL</label>
                         <input type="url" id="profileAvatar" name="avatar" class="form-control" 
                                value="<?= sanitize($user['avatar']) ?>" 
                                placeholder="https://..." oninput="document.getElementById('profileAvatarPreview').src=this.value">

@@ -24,7 +24,7 @@ if (php_sapi_name() !== 'cli') {
 try {
     $pdo->exec("UPDATE `news` SET `views` = 0");
     $totalReset = $pdo->query("SELECT COUNT(*) FROM `news`")->fetchColumn();
-    $msg = "सफलता: सभी {$totalReset} खबरों के पाठक व्यूज 0 पर रीसेट कर दिए गए हैं। अब सिर्फ नए लाइव व्यूज काउंट होंगे!";
+    $msg = "Success: Views counter for all {$totalReset} articles has been reset to 0. Only new live views will be counted from now on!";
 
     if (php_sapi_name() === 'cli') {
         echo "$msg\n";
@@ -36,7 +36,7 @@ try {
     header("Location: index.php");
     exit;
 } catch (PDOException $e) {
-    $err = "त्रुटि: " . $e->getMessage();
+    $err = "Error: " . $e->getMessage();
     if (php_sapi_name() === 'cli') {
         echo "$err\n";
         exit;

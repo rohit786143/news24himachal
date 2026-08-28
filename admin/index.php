@@ -9,8 +9,8 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 $isEditor = (!empty($_SESSION['admin_user']) && $_SESSION['admin_user']['role'] === 'editor');
-$adminTitle = $isEditor ? 'मेरा डैशबोर्ड' : 'डैशबोर्ड';
-$adminHeading = $isEditor ? 'संवाददाता डैशबोर्ड (Reporter Overview)' : 'एडमिन डैशबोर्ड (Dashboard)';
+$adminTitle = $isEditor ? 'My Dashboard' : 'Dashboard';
+$adminHeading = $isEditor ? 'Reporter Dashboard (Overview)' : 'Admin Dashboard';
 
 require_once __DIR__ . '/includes/header.php';
 
@@ -88,17 +88,17 @@ if ($isEditor) {
             <div>
                 <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                     <h2 style="font-size: 1.4rem; font-weight: 800; color: #FFFFFF; margin: 0;">
-                        नमस्ते, <?= sanitize($currentUser['name']) ?>!
+                        Welcome, <?= sanitize($currentUser['name']) ?>!
                     </h2>
                     <span class="badge badge-blue" style="font-size: 0.75rem; padding: 3px 8px;">
-                        ✍️ अधिकृत संवाददाता
+                        ✍️ Authorized Reporter
                     </span>
                 </div>
                 <p style="font-size: 0.85rem; color: #94A3B8; margin-top: 4px;">
-                    <i class="fas fa-id-card" style="color: #38BDF8;"></i> <?= sanitize($currentUser['designation'] ?: 'संवाददाता • News 24 Himachal') ?>
+                    <i class="fas fa-id-card" style="color: #38BDF8;"></i> <?= sanitize($currentUser['designation'] ?: 'Reporter • News 24 Himachal') ?>
                     &nbsp;|&nbsp; 
                     <a href="/author.php?id=<?= $currentUserId ?>" target="_blank" style="color: #38BDF8; text-decoration: none; font-weight: 600;">
-                        <i class="fas fa-arrow-up-right-from-square"></i> आपकी लाइव पब्लिक प्रोफाइल
+                        <i class="fas fa-arrow-up-right-from-square"></i> Your Live Public Profile
                     </a>
                 </p>
             </div>
@@ -106,7 +106,7 @@ if ($isEditor) {
 
         <div>
             <a href="/admin/post-edit.php" class="topbar-btn" style="background: var(--primary); padding: 12px 22px; font-size: 1rem;">
-                <i class="fas fa-pen-nib"></i> नई खबर लिखें (Add New Post)
+                <i class="fas fa-pen-nib"></i> Write New Post
             </a>
         </div>
     </div>
@@ -115,7 +115,7 @@ if ($isEditor) {
     <div class="stats-grid" style="margin-bottom: 24px;">
         <div class="stat-card">
             <div class="stat-info">
-                <h4>मेरी कुल प्रकाशित खबरें</h4>
+                <h4>Total Published Posts</h4>
                 <div class="stat-number"><?= number_format($totalPosts) ?></div>
             </div>
             <div class="stat-icon-wrap stat-icon-red">
@@ -125,7 +125,7 @@ if ($isEditor) {
 
         <div class="stat-card">
             <div class="stat-info">
-                <h4>मेरी खबरों के कुल व्यूज</h4>
+                <h4>Total Post Views</h4>
                 <div class="stat-number"><?= number_format($totalViews) ?></div>
             </div>
             <div class="stat-icon-wrap stat-icon-blue">
@@ -135,7 +135,7 @@ if ($isEditor) {
 
         <div class="stat-card">
             <div class="stat-info">
-                <h4>ब्रेकिंग न्यूज़ अलर्ट्स</h4>
+                <h4>Breaking News Alerts</h4>
                 <div class="stat-number"><?= number_format($totalBreaking) ?></div>
             </div>
             <div class="stat-icon-wrap stat-icon-amber">
@@ -145,7 +145,7 @@ if ($isEditor) {
 
         <div class="stat-card">
             <div class="stat-info">
-                <h4>ट्रेंडिंग खबरें</h4>
+                <h4>Trending News</h4>
                 <div class="stat-number"><?= number_format($totalTrending) ?></div>
             </div>
             <div class="stat-icon-wrap stat-icon-green">
@@ -157,16 +157,16 @@ if ($isEditor) {
     <!-- Quick Action Navigation for Editor -->
     <div style="display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap;">
         <a href="/admin/post-edit.php" class="topbar-btn" style="padding: 10px 18px;">
-            <i class="fas fa-plus-circle"></i> नई खबर लिखें
+            <i class="fas fa-plus-circle"></i> Write New Post
         </a>
         <a href="/admin/posts.php" class="topbar-btn topbar-btn-secondary" style="padding: 10px 18px;">
-            <i class="fas fa-list-check"></i> मेरी सभी प्रकाशित खबरें (<?= $totalPosts ?>)
+            <i class="fas fa-list-check"></i> My Published Posts (<?= $totalPosts ?>)
         </a>
         <a href="/admin/profile.php" class="topbar-btn topbar-btn-secondary" style="padding: 10px 18px;">
-            <i class="fas fa-user-gear"></i> मेरी प्रोफाइल व पासवर्ड
+            <i class="fas fa-user-gear"></i> Profile & Password
         </a>
         <a href="/author.php?id=<?= $currentUserId ?>" target="_blank" class="topbar-btn topbar-btn-secondary" style="padding: 10px 18px; color: #0284C7;">
-            <i class="fas fa-id-badge"></i> पब्लिक लेखक प्रोफाइल देखें
+            <i class="fas fa-id-badge"></i> View Public Author Profile
         </a>
     </div>
 
@@ -176,21 +176,21 @@ if ($isEditor) {
         <!-- Left: Editor's Recent Articles -->
         <div class="panel">
             <div class="panel-header">
-                <h2 class="panel-title"><i class="fas fa-newspaper" style="color: var(--primary);"></i> आपके द्वारा हाल ही में प्रकाशित खबरें</h2>
+                <h2 class="panel-title"><i class="fas fa-newspaper" style="color: var(--primary);"></i> Recently Published Articles</h2>
                 <a href="/admin/posts.php" style="color: #0284C7; font-size: 0.85rem; font-weight: 700; text-decoration: none;">
-                    मेरी सभी खबरें देखें (<?= $totalPosts ?>) &rarr;
+                    View All My Posts (<?= $totalPosts ?>) &rarr;
                 </a>
             </div>
             <div class="table-responsive">
                 <table class="admin-table">
                     <thead>
                         <tr>
-                            <th>थंबनेल</th>
-                            <th>शीर्षक (Title)</th>
-                            <th>श्रेणी</th>
-                            <th>व्यूज</th>
-                            <th>दिनांक</th>
-                            <th style="text-align: right;">कार्य (Actions)</th>
+                            <th>Thumbnail</th>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Views</th>
+                            <th>Date</th>
+                            <th style="text-align: right;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -198,9 +198,9 @@ if ($isEditor) {
                             <tr>
                                 <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 40px;">
                                     <i class="fas fa-feather-pointed" style="font-size: 2.5rem; color: #CBD5E1; margin-bottom: 10px; display: block;"></i>
-                                    आपने अभी तक कोई खबर प्रकाशित नहीं की है।<br>
+                                    You have not published any posts yet.<br>
                                     <a href="/admin/post-edit.php" class="topbar-btn" style="display: inline-flex; margin-top: 14px; padding: 8px 16px;">
-                                        <i class="fas fa-plus"></i> अपनी पहली खबर लिखें
+                                        <i class="fas fa-plus"></i> Write Your First Post
                                     </a>
                                 </td>
                             </tr>
@@ -218,13 +218,13 @@ if ($isEditor) {
                                         </div>
                                         <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
                                             <?php if ($news['is_breaking']): ?>
-                                                <span class="badge badge-red" style="font-size: 0.65rem;">⚡ ब्रेकिंग</span>
+                                                <span class="badge badge-red" style="font-size: 0.65rem;">⚡ Breaking</span>
                                             <?php endif; ?>
                                             <?php if ($news['is_featured']): ?>
-                                                <span class="badge badge-amber" style="font-size: 0.65rem;">⭐ लीड स्लाइडर</span>
+                                                <span class="badge badge-amber" style="font-size: 0.65rem;">⭐ Lead Slider</span>
                                             <?php endif; ?>
                                             <?php if ($news['is_trending']): ?>
-                                                <span class="badge badge-green" style="font-size: 0.65rem;">🔥 ट्रेंडिंग</span>
+                                                <span class="badge badge-green" style="font-size: 0.65rem;">🔥 Trending</span>
                                             <?php endif; ?>
                                         </div>
                                     </td>
@@ -241,13 +241,13 @@ if ($isEditor) {
                                     </td>
                                     <td>
                                         <div class="action-btns" style="justify-content: flex-end;">
-                                            <a href="/article.php?slug=<?= urlencode($news['slug']) ?>" target="_blank" class="btn-icon" style="background: #F1F5F9; color: #0284C7; border: 1px solid #CBD5E1;" title="वेबसाइट पर लाइव देखें">
+                                            <a href="/article.php?slug=<?= urlencode($news['slug']) ?>" target="_blank" class="btn-icon" style="background: #F1F5F9; color: #0284C7; border: 1px solid #CBD5E1;" title="View Live on Website">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="/admin/post-edit.php?id=<?= $news['id'] ?>" class="btn-icon btn-icon-edit" title="संपादित करें (Edit)">
+                                            <a href="/admin/post-edit.php?id=<?= $news['id'] ?>" class="btn-icon btn-icon-edit" title="Edit">
                                                 <i class="fas fa-pen"></i>
                                             </a>
-                                            <button type="button" class="btn-icon btn-icon-delete" title="हटाएं (Delete)" onclick="confirmDelete('/admin/posts.php?action=delete&id=<?= $news['id'] ?>', 'इस खबर')">
+                                            <button type="button" class="btn-icon btn-icon-delete" title="Delete" onclick="confirmDelete('/admin/posts.php?action=delete&id=<?= $news['id'] ?>', 'this article')">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
@@ -265,7 +265,7 @@ if ($isEditor) {
             <!-- Quick Bio Card -->
             <div class="panel" style="margin-bottom: 20px;">
                 <div class="panel-header">
-                    <h2 class="panel-title"><i class="fas fa-user-check"></i> आपका रिपोर्टर विवरण</h2>
+                    <h2 class="panel-title"><i class="fas fa-user-check"></i> Reporter Details</h2>
                 </div>
                 <div class="panel-body text-center">
                     <img src="<?= sanitize($currentUser['avatar']) ?>" alt="Avatar" 
@@ -274,10 +274,10 @@ if ($isEditor) {
                         <?= sanitize($currentUser['name']) ?>
                     </h3>
                     <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
-                        <?= sanitize($currentUser['designation'] ?: 'संवाददाता • News 24 Himachal') ?>
+                        <?= sanitize($currentUser['designation'] ?: 'Reporter • News 24 Himachal') ?>
                     </p>
                     <a href="/admin/profile.php" class="topbar-btn topbar-btn-secondary" style="width: 100%; justify-content: center; font-size: 0.85rem;">
-                        <i class="fas fa-user-pen"></i> प्रोफाइल व पासवर्ड अपडेट करें
+                        <i class="fas fa-user-pen"></i> Update Profile & Password
                     </a>
                 </div>
             </div>
@@ -285,20 +285,20 @@ if ($isEditor) {
             <!-- News Publishing Guidelines -->
             <div class="panel" style="background: linear-gradient(135deg, #F0F9FF 0%, #FFFFFF 100%); border: 1.5px solid #BAE6FD;">
                 <div class="panel-header" style="background: transparent; border-bottom: 1px solid #E0F2FE;">
-                    <h2 class="panel-title" style="color: #0369A1;"><i class="fas fa-lightbulb"></i> खबर लेखन दिशा-निर्देश</h2>
+                    <h2 class="panel-title" style="color: #0369A1;"><i class="fas fa-lightbulb"></i> Article Writing Guidelines</h2>
                 </div>
                 <div class="panel-body" style="font-size: 0.85rem; color: #334155; line-height: 1.6;">
                     <div style="margin-bottom: 10px; display: flex; gap: 8px;">
                         <i class="fas fa-check-circle" style="color: #0284C7; margin-top: 3px;"></i>
-                        <span>खबर का शीर्षक आकर्षक, स्पष्ट और तथ्यात्मक रखें।</span>
+                        <span>Keep article headlines attractive, clear, and factual.</span>
                     </div>
                     <div style="margin-bottom: 10px; display: flex; gap: 8px;">
                         <i class="fas fa-check-circle" style="color: #0284C7; margin-top: 3px;"></i>
-                        <span>उच्च गुणवत्ता वाली वास्तविक तस्वीर (Landscape Format) का लिंक लगाएं।</span>
+                        <span>Provide a high-quality featured image URL (Landscape Format).</span>
                     </div>
                     <div style="display: flex; gap: 8px;">
                         <i class="fas fa-check-circle" style="color: #0284C7; margin-top: 3px;"></i>
-                        <span>यदि खबर अत्यंत महत्वपूर्ण या ताज़ा है, तो <strong>'ब्रेकिंग न्यूज़'</strong> का चयन करें।</span>
+                        <span>If the news is urgent or breaking, select <strong>'Breaking News'</strong>.</span>
                     </div>
                 </div>
             </div>
@@ -315,7 +315,7 @@ if ($isEditor) {
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-info">
-                <h4>कुल समाचार (Articles)</h4>
+                <h4>Total Articles</h4>
                 <div class="stat-number"><?= number_format($totalPosts) ?></div>
             </div>
             <div class="stat-icon-wrap stat-icon-red">
@@ -325,7 +325,7 @@ if ($isEditor) {
 
         <div class="stat-card">
             <div class="stat-info">
-                <h4>कुल पाठक व्यूज (Views)</h4>
+                <h4>Total Views</h4>
                 <div class="stat-number"><?= number_format($totalViews) ?></div>
             </div>
             <div class="stat-icon-wrap stat-icon-blue">
@@ -335,8 +335,8 @@ if ($isEditor) {
 
         <div class="stat-card">
             <div class="stat-info">
-                <h4>श्रेणियां (Categories)</h4>
-                <div class="stat-number"><?= $totalCategories ?> <span style="font-size: 0.85rem; font-weight: normal; color: var(--text-muted);">(+<?= $totalSubcategories ?> उप)</span></div>
+                <h4>Categories</h4>
+                <div class="stat-number"><?= $totalCategories ?> <span style="font-size: 0.85rem; font-weight: normal; color: var(--text-muted);">(+<?= $totalSubcategories ?> Sub)</span></div>
             </div>
             <div class="stat-icon-wrap stat-icon-amber">
                 <i class="fas fa-folder-tree"></i>
@@ -345,7 +345,7 @@ if ($isEditor) {
 
         <div class="stat-card">
             <div class="stat-info">
-                <h4>संपादक / यूज़र्स (Editors)</h4>
+                <h4>Editors / Users</h4>
                 <div class="stat-number"><?= number_format($totalUsers) ?></div>
             </div>
             <div class="stat-icon-wrap stat-icon-green">
@@ -357,28 +357,28 @@ if ($isEditor) {
     <!-- Quick Action Shortcuts for Admin -->
     <div style="display: flex; gap: 12px; margin-bottom: 30px; flex-wrap: wrap;">
         <a href="post-edit.php" class="topbar-btn" style="padding: 10px 18px;">
-            <i class="fas fa-plus-circle"></i> नई खबर लिखें (Add Post)
+            <i class="fas fa-plus-circle"></i> Add New Post
         </a>
         <a href="posts.php" class="topbar-btn topbar-btn-secondary" style="padding: 10px 18px;">
-            <i class="fas fa-file-lines"></i> सभी खबरें प्रबंधित करें
+            <i class="fas fa-file-lines"></i> Manage All Posts
         </a>
         <a href="users.php" class="topbar-btn topbar-btn-secondary" style="padding: 10px 18px;">
-            <i class="fas fa-users-gear"></i> संपादक / यूज़र्स
+            <i class="fas fa-users-gear"></i> Editors / Users
         </a>
         <a href="/admin/categories.php" class="topbar-btn topbar-btn-secondary" style="padding: 10px 18px;">
-            <i class="fas fa-tags"></i> श्रेणियां
+            <i class="fas fa-tags"></i> Categories
         </a>
         <a href="/admin/settings.php" class="topbar-btn topbar-btn-secondary" style="padding: 10px 18px;">
-            <i class="fas fa-sliders"></i> साइट सेटिंग्स
+            <i class="fas fa-sliders"></i> Site Settings
         </a>
         <a href="/admin/advertisements.php" class="topbar-btn topbar-btn-secondary" style="padding: 10px 18px;">
-            <i class="fas fa-rectangle-ad"></i> विज्ञापन प्रबंधन (Ads)
+            <i class="fas fa-rectangle-ad"></i> Ads Management
         </a>
         <a href="/admin/live-bulletins.php" class="topbar-btn topbar-btn-secondary" style="padding: 10px 18px;">
-            <i class="fas fa-tower-broadcast" style="color: var(--primary-red);"></i> लाइव बुलेटिन
+            <i class="fas fa-tower-broadcast" style="color: var(--primary-red);"></i> Live Bulletins
         </a>
         <a href="/admin/notifications.php" class="topbar-btn topbar-btn-secondary" style="padding: 10px 18px;">
-            <i class="fas fa-paper-plane"></i> पुश अलर्ट भेजें
+            <i class="fas fa-paper-plane"></i> Send Push Alert
         </a>
     </div>
 
@@ -388,24 +388,24 @@ if ($isEditor) {
         <!-- Recent Posts Table Panel -->
         <div class="panel">
             <div class="panel-header">
-                <h2 class="panel-title"><i class="fas fa-clock-rotate-left"></i> हाल ही में प्रकाशित खबरें (Recent Articles)</h2>
-                <a href="/admin/posts.php" style="color: #0284C7; font-size: 0.85rem; font-weight: 600; text-decoration: none;">सभी देखें &rarr;</a>
+                <h2 class="panel-title"><i class="fas fa-clock-rotate-left"></i> Recent Articles</h2>
+                <a href="/admin/posts.php" style="color: #0284C7; font-size: 0.85rem; font-weight: 600; text-decoration: none;">View All &rarr;</a>
             </div>
             <div class="table-responsive">
                 <table class="admin-table">
                     <thead>
                         <tr>
-                            <th>थंबनेल</th>
-                            <th>शीर्षक (Title)</th>
-                            <th>श्रेणी</th>
-                            <th>व्यूज</th>
-                            <th>दिनांक</th>
-                            <th>कार्य (Actions)</th>
+                            <th>Thumbnail</th>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Views</th>
+                            <th>Date</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($recentNews)): ?>
-                            <tr><td colspan="6" style="text-align: center; color: var(--text-dim); padding: 30px;">कोई खबर उपलब्ध नहीं है।</td></tr>
+                            <tr><td colspan="6" style="text-align: center; color: var(--text-dim); padding: 30px;">No articles available.</td></tr>
                         <?php else: ?>
                             <?php foreach ($recentNews as $news): ?>
                                 <tr>
@@ -421,7 +421,7 @@ if ($isEditor) {
                                         <div style="font-size: 0.75rem; color: var(--text-dim);">
                                             <?= sanitize($news['author']) ?>
                                             <?php if ($news['is_breaking']): ?>
-                                                <span class="badge badge-red" style="font-size: 0.65rem;">ब्रेकिंग</span>
+                                                <span class="badge badge-red" style="font-size: 0.65rem;">Breaking</span>
                                             <?php endif; ?>
                                         </div>
                                     </td>
@@ -436,10 +436,10 @@ if ($isEditor) {
                                     </td>
                                     <td>
                                         <div class="action-btns">
-                                            <a href="/admin/post-edit.php?id=<?= $news['id'] ?>" class="btn-icon btn-icon-edit" title="संपादित करें (Edit)">
+                                            <a href="/admin/post-edit.php?id=<?= $news['id'] ?>" class="btn-icon btn-icon-edit" title="Edit">
                                                 <i class="fas fa-pen"></i>
                                             </a>
-                                            <button type="button" class="btn-icon btn-icon-delete" title="हटाएं (Delete)" onclick="confirmDelete('/admin/posts.php?action=delete&id=<?= $news['id'] ?>', 'इस खबर')">
+                                            <button type="button" class="btn-icon btn-icon-delete" title="Delete" onclick="confirmDelete('/admin/posts.php?action=delete&id=<?= $news['id'] ?>', 'this article')">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
@@ -456,19 +456,19 @@ if ($isEditor) {
         <div>
             <div class="panel">
                 <div class="panel-header">
-                    <h2 class="panel-title"><i class="fas fa-inbox"></i> ताज़ा संदेश (Messages)</h2>
-                    <a href="/admin/messages.php" style="color: #0284C7; font-size: 0.85rem; font-weight: 600; text-decoration: none;">सभी (<?= $totalMessages ?>) &rarr;</a>
+                    <h2 class="panel-title"><i class="fas fa-inbox"></i> Recent Messages</h2>
+                    <a href="/admin/messages.php" style="color: #0284C7; font-size: 0.85rem; font-weight: 600; text-decoration: none;">View All (<?= $totalMessages ?>) &rarr;</a>
                 </div>
                 <div class="panel-body" style="padding: 16px;">
                     <?php if (empty($recentMessages)): ?>
-                        <p style="color: var(--text-dim); text-align: center; padding: 20px 0;">कोई संदेश प्राप्त नहीं हुआ।</p>
+                        <p style="color: var(--text-dim); text-align: center; padding: 20px 0;">No messages received.</p>
                     <?php else: ?>
                         <div style="display: flex; flex-direction: column; gap: 12px;">
                             <?php foreach ($recentMessages as $msg): ?>
                                 <div style="background: #F8FAFC; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px;">
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                                         <strong style="font-size: 0.88rem; color: var(--text-heading);"><?= sanitize($msg['name']) ?></strong>
-                                        <span style="font-size: 0.72rem; color: var(--text-dim);"><?= timeAgoHindi($msg['created_at']) ?></span>
+                                        <span style="font-size: 0.72rem; color: var(--text-dim);"><?= date('d M Y, h:i A', strtotime($msg['created_at'])) ?></span>
                                     </div>
                                     <div style="font-size: 0.82rem; color: #0284C7; margin-bottom: 4px; font-weight: 600;">
                                         <?= sanitize($msg['subject']) ?>
@@ -487,10 +487,10 @@ if ($isEditor) {
             <div class="panel" style="background: linear-gradient(135deg, #FEF2F2 0%, #FFFFFF 100%); border: 1px solid #FECACA;">
                 <div class="panel-body">
                     <h3 style="font-size: 1rem; color: var(--primary); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; font-weight: 700;">
-                        <i class="fas fa-circle-check" style="color: var(--accent-green);"></i> लाइव सिस्टम सक्रिय है
+                        <i class="fas fa-circle-check" style="color: var(--accent-green);"></i> Live System Active
                     </h3>
                     <p style="font-size: 0.84rem; color: var(--text-muted); line-height: 1.5;">
-                        आपका पोर्टल और डेटाबेस पूरी तरह सक्रिय हैं। यहां से जोड़ा गया कोई भी लेख, श्रेणी या पेज तुरंत मुख्य वेबसाइट पर दिखने लगेगा।
+                        Your portal and database are fully active. Any article, category, or page added from here will immediately appear on the main website.
                     </p>
                 </div>
             </div>

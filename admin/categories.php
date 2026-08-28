@@ -4,8 +4,8 @@
  * Himachal News - Khabar 24
  */
 
-$adminTitle = 'श्रेणी प्रबंधन (Categories)';
-$adminHeading = 'श्रेणी एवं उप-श्रेणी प्रबंधन (Category Management)';
+$adminTitle = 'Categories';
+$adminHeading = 'Category Management';
 
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../includes/functions.php';
@@ -19,10 +19,10 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
     try {
         $stmt = $pdo->prepare("DELETE FROM `categories` WHERE `id` = ?");
         $stmt->execute([$delId]);
-        $_SESSION['flash_message'] = "श्रेणी (ID #{$delId}) को सफलतापूर्वक हटा दिया गया है।";
+        $_SESSION['flash_message'] = "Category (ID #{$delId}) deleted successfully.";
         $_SESSION['flash_type'] = "success";
     } catch (PDOException $e) {
-        $_SESSION['flash_message'] = "त्रुटि: श्रेणी को हटाया नहीं जा सका। " . $e->getMessage();
+        $_SESSION['flash_message'] = "Error: Could not delete category. " . $e->getMessage();
         $_SESSION['flash_type'] = "danger";
     }
     header("Location: /admin/categories.php");
@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_category'])) {
     $displayOrder = isset($_POST['display_order']) ? (int)$_POST['display_order'] : 0;
 
     if (empty($name)) {
-        $error = "कृपया श्रेणी का नाम दर्ज करें।";
+        $error = "Please enter the category name.";
     } else {
         if (empty($slug)) {
             $slug = slugify($name);
@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_category'])) {
                     WHERE `id` = ?
                 ");
                 $stmt->execute([$name, $slug, $parentId, $displayOrder, $catId]);
-                $_SESSION['flash_message'] = "श्रेणी '{$name}' को सफलतापूर्वक अपडेट कर दिया गया!";
+                $_SESSION['flash_message'] = "Category '{$name}' updated successfully!";
                 $_SESSION['flash_type'] = "success";
             } else {
                 // Insert New
@@ -69,13 +69,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_category'])) {
                     VALUES (?, ?, ?, ?, NOW())
                 ");
                 $stmt->execute([$name, $slug, $parentId, $displayOrder]);
-                $_SESSION['flash_message'] = "नई श्रेणी '{$name}' सफलतापूर्वक जोड़ दी गई!";
+                $_SESSION['flash_message'] = "New category '{$name}' added successfully!";
                 $_SESSION['flash_type'] = "success";
             }
             header("Location: /admin/categories.php");
             exit;
         } catch (PDOException $e) {
-            $error = "डेटाबेस त्रुटि: " . $e->getMessage();
+            $error = "Database error: " . $e->getMessage();
         }
     }
 }
@@ -131,11 +131,11 @@ require_once __DIR__ . '/includes/header.php';
             <div class="panel-header">
                 <h2 class="panel-title">
                     <i class="fas <?= $editCat ? 'fa-pen-to-square' : 'fa-folder-plus' ?>"></i>
-                    <?= $editCat ? 'श्रेणी संपादित करें (Edit)' : 'नई श्रेणी जोड़ें (Add New)' ?>
+                    <?= $editCat ? 'Edit Category' : 'Add New Category' ?>
                 </h2>
                 <?php if ($editCat): ?>
                     <a href="categories.php" style="color: var(--accent-blue); font-size: 0.82rem; font-weight: 600; text-decoration: none;">
-                        <i class="fas fa-plus"></i> नया जोड़ें
+                        <i class="fas fa-plus"></i> Add New
                     </a>
                 <?php endif; ?>
             </div>
@@ -149,10 +149,10 @@ require_once __DIR__ . '/includes/header.php';
                     <!-- Category Name -->
                     <div class="form-group">
                         <label class="form-label" for="catName">
-                            श्रेणी का नाम (Category Name) <span class="required">*</span>
+                            Category Name <span class="required">*</span>
                         </label>
                         <input type="text" id="catName" name="name" class="form-control" 
-                               placeholder="उदा: सियासत, खेल, कुल्लू, मंडी..." 
+                               placeholder="e.g. Politics, Sports, Shimla, Mandi..." 
                                value="<?= sanitize($editCat['name'] ?? '') ?>" required 
                                oninput="if(!document.getElementById('catSlug').getAttribute('data-edited')) document.getElementById('catSlug').value = generateSlug(this.value);">
                     </div>
@@ -160,22 +160,22 @@ require_once __DIR__ . '/includes/header.php';
                     <!-- Slug -->
                     <div class="form-group">
                         <label class="form-label" for="catSlug">
-                            URL स्लग (Slug) <span class="required">*</span>
+                            URL Slug <span class="required">*</span>
                         </label>
                         <input type="text" id="catSlug" name="slug" class="form-control" 
-                               placeholder="politics, sports, kullu" 
+                               placeholder="politics, sports, shimla" 
                                value="<?= sanitize($editCat['slug'] ?? '') ?>" required
                                oninput="this.setAttribute('data-edited', 'true')">
-                        <span class="form-hint">वेबसाइट URL में उपयोग होगा (उदा: /category.php?cat=sports)</span>
+                        <span class="form-hint">Used in website URL (e.g. /category.php?cat=sports)</span>
                     </div>
 
                     <!-- Parent Category Select -->
                     <div class="form-group">
                         <label class="form-label" for="parentSelect">
-                            मुख्य श्रेणी चुनें (Parent Category)
+                            Parent Category
                         </label>
                         <select name="parent_id" id="parentSelect" class="form-control">
-                            <option value="">-- मुख्य श्रेणी बनाएं (None / Main Parent) --</option>
+                            <option value="">-- None (Main Parent Category) --</option>
                             <?php foreach ($parents as $p): ?>
                                 <?php if ($editCat && $editCat['id'] == $p['id']) continue; // Cannot be parent of itself ?>
                                 <option value="<?= $p['id'] ?>" <?= (($editCat['parent_id'] ?? '') == $p['id']) ? 'selected' : '' ?>>
@@ -183,27 +183,27 @@ require_once __DIR__ . '/includes/header.php';
                                 </option>
                             <?php endforeach; ?>
                         </select>
-                        <span class="form-hint">यदि यह उप-श्रेणी (Subcategory/District) है तो उसका मुख्य जनक चुनें।</span>
+                        <span class="form-hint">If this is a subcategory or district, select its parent category.</span>
                     </div>
 
                     <!-- Display Order -->
                     <div class="form-group">
                         <label class="form-label" for="displayOrder">
-                            प्रदर्शन क्रम (Display Order)
+                            Display Order
                         </label>
                         <input type="number" id="displayOrder" name="display_order" class="form-control" 
                                value="<?= (int)($editCat['display_order'] ?? 0) ?>">
-                        <span class="form-hint">कम संख्या वाले मेनू में पहले दिखेंगे (1, 2, 3...)</span>
+                        <span class="form-hint">Lower numbers appear first in menu (1, 2, 3...)</span>
                     </div>
 
                     <button type="submit" class="topbar-btn" style="width: 100%; justify-content: center; padding: 12px; margin-top: 10px;">
-                        <i class="fas fa-check-circle"></i> <?= $editCat ? 'परिवर्तन सुरक्षित करें' : 'श्रेणी जोड़ें (Save Category)' ?>
+                        <i class="fas fa-check-circle"></i> <?= $editCat ? 'Save Changes' : 'Save Category' ?>
                     </button>
 
                     <?php if ($editCat): ?>
                         <div style="text-align: center; margin-top: 12px;">
                             <a href="/admin/categories.php" style="color: var(--text-dim); font-size: 0.85rem; text-decoration: none;">
-                                <i class="fas fa-xmark"></i> संपादन रद्द करें
+                                <i class="fas fa-xmark"></i> Cancel Edit
                             </a>
                         </div>
                     <?php endif; ?>
@@ -217,7 +217,7 @@ require_once __DIR__ . '/includes/header.php';
         <div class="panel">
             <div class="panel-header">
                 <h2 class="panel-title">
-                    <i class="fas fa-list-check"></i> सभी श्रेणियां एवं उप-श्रेणियां (All Categories Tree)
+                    <i class="fas fa-list-check"></i> All Categories & Subcategories
                 </h2>
             </div>
             <div class="panel-body" style="padding: 16px;">
@@ -237,19 +237,19 @@ require_once __DIR__ . '/includes/header.php';
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 12px;">
                                     <span class="badge badge-blue">
-                                        <?= $p['post_count'] ?> खबरें
+                                        <?= $p['post_count'] ?> articles
                                     </span>
-                                    <span class="badge badge-gray" title="क्रम">
-                                        क्रम: <?= $p['display_order'] ?>
+                                    <span class="badge badge-gray" title="Order">
+                                        Order: <?= $p['display_order'] ?>
                                     </span>
                                     <div class="action-btns">
-                                        <a href="/category.php?cat=<?= urlencode($p['slug']) ?>" target="_blank" class="btn-icon" title="वेबसाइट पर देखें">
+                                        <a href="/category.php?cat=<?= urlencode($p['slug']) ?>" target="_blank" class="btn-icon" title="View on Website">
                                             <i class="fas fa-external-link-alt"></i>
                                         </a>
-                                        <a href="/admin/categories.php?edit=<?= $p['id'] ?>" class="btn-icon btn-icon-edit" title="संपादित करें">
+                                        <a href="/admin/categories.php?edit=<?= $p['id'] ?>" class="btn-icon btn-icon-edit" title="Edit">
                                             <i class="fas fa-pen"></i>
                                         </a>
-                                        <button type="button" class="btn-icon btn-icon-delete" title="हटाएं" onclick="confirmDelete('/admin/categories.php?action=delete&id=<?= $p['id'] ?>', 'इस श्रेणी (<?= addslashes($p['name']) ?>)')">
+                                        <button type="button" class="btn-icon btn-icon-delete" title="Delete" onclick="confirmDelete('/admin/categories.php?action=delete&id=<?= $p['id'] ?>', 'this category (<?= addslashes($p['name']) ?>)')">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -268,13 +268,13 @@ require_once __DIR__ . '/includes/header.php';
                                             </div>
                                             <div style="display: flex; align-items: center; gap: 10px;">
                                                 <span class="badge badge-gray" style="font-size: 0.68rem;">
-                                                    <?= $sub['post_count'] ?> खबरें
+                                                    <?= $sub['post_count'] ?> articles
                                                 </span>
                                                 <div class="action-btns">
-                                                    <a href="/admin/categories.php?edit=<?= $sub['id'] ?>" class="btn-icon btn-icon-edit" style="width: 28px; height: 28px; font-size: 0.75rem;" title="संपादित करें">
+                                                    <a href="/admin/categories.php?edit=<?= $sub['id'] ?>" class="btn-icon btn-icon-edit" style="width: 28px; height: 28px; font-size: 0.75rem;" title="Edit">
                                                         <i class="fas fa-pen"></i>
                                                     </a>
-                                                    <button type="button" class="btn-icon btn-icon-delete" style="width: 28px; height: 28px; font-size: 0.75rem;" title="हटाएं" onclick="confirmDelete('/admin/categories.php?action=delete&id=<?= $sub['id'] ?>', 'इस उप-श्रेणी')">
+                                                    <button type="button" class="btn-icon btn-icon-delete" style="width: 28px; height: 28px; font-size: 0.75rem;" title="Delete" onclick="confirmDelete('/admin/categories.php?action=delete&id=<?= $sub['id'] ?>', 'this subcategory')">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </div>

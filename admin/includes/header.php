@@ -41,7 +41,7 @@ $adminOnlyPages = [
 ];
 
 if ($isEditor && in_array($currentPage, $adminOnlyPages)) {
-    $_SESSION['flash_message'] = "अनुमति अस्वीकृत: आपके पास इस सेक्शन को एक्सेस करने का अधिकार नहीं है।";
+    $_SESSION['flash_message'] = "Permission Denied: You do not have access to this section.";
     $_SESSION['flash_type'] = "danger";
     header("Location: /admin/index.php");
     exit;
@@ -66,12 +66,12 @@ if (isset($_SERVER['REQUEST_URI']) && preg_match('#^/admin(\?.*)?$#i', $_SERVER[
 }
 ?>
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <base href="/admin/">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= isset($adminTitle) ? sanitize($adminTitle) . ' | ' : '' ?>एडमिन कंट्रोल पैनल - <?= sanitize($siteName) ?></title>
+    <title><?= isset($adminTitle) ? sanitize($adminTitle) . ' | ' : '' ?>Admin Control Panel - <?= sanitize($siteName) ?></title>
     
     <!-- Google Fonts: Inter & Outfit & Hind -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -841,9 +841,9 @@ if (isset($_SERVER['REQUEST_URI']) && preg_match('#^/admin(\?.*)?$#i', $_SERVER[
                 </div>
                 <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
                     <span class="badge <?= $isAdmin ? 'badge-red' : 'badge-blue' ?>" style="font-size: 0.65rem; padding: 1px 6px;">
-                        <?= $isAdmin ? '👑 मुख्य एडमिन' : '✍️ संवाददाता' ?>
+                        <?= $isAdmin ? '👑 Chief Admin' : '✍️ Reporter' ?>
                     </span>
-                    <a href="/admin/profile.php" style="color: #94A3B8; font-size: 0.75rem; text-decoration: none;" title="प्रोफ़ाइल एडिट करें">
+                    <a href="/admin/profile.php" style="color: #94A3B8; font-size: 0.75rem; text-decoration: none;" title="Edit Profile">
                         <i class="fas fa-pen-to-square"></i>
                     </a>
                 </div>
@@ -855,145 +855,145 @@ if (isset($_SERVER['REQUEST_URI']) && preg_match('#^/admin(\?.*)?$#i', $_SERVER[
                 <!-- ==========================================
                      EDITOR ONLY DEDICATED SIDEBAR (4 ITEMS ONLY)
                      ========================================== -->
-                <span class="menu-label">रिपोर्टर वर्कस्पेस</span>
+                <span class="menu-label">Reporter Workspace</span>
                 
                 <a href="/admin/index.php" class="nav-item <?= $currentPage === 'index.php' ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-gauge-high"></i>
-                        <span>मेरा वर्कस्पेस (Overview)</span>
+                        <span>My Workspace (Overview)</span>
                     </div>
                 </a>
 
                 <a href="/admin/post-edit.php" class="nav-item <?= in_array($currentPage, ['post-edit.php']) && !isset($_GET['id']) ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-pen-nib"></i>
-                        <span>नई खबर लिखें (Add Post)</span>
+                        <span>Write New Post</span>
                     </div>
                 </a>
 
                 <a href="/admin/posts.php" class="nav-item <?= in_array($currentPage, ['posts.php']) ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-newspaper"></i>
-                        <span>मेरी प्रकाशित खबरें (My Posts)</span>
+                        <span>My Published Posts</span>
                     </div>
                 </a>
 
-                <span class="menu-label">खाता सेटिंग्स</span>
+                <span class="menu-label">Account Settings</span>
 
                 <a href="/admin/profile.php" class="nav-item <?= $currentPage === 'profile.php' ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-user-pen"></i>
-                        <span>मेरी प्रोफाइल एवं पासवर्ड</span>
+                        <span>My Profile & Password</span>
                     </div>
                 </a>
             <?php else: ?>
                 <!-- ==========================================
                      ADMIN MASTER SIDEBAR (ALL MODULES)
                      ========================================== -->
-                <span class="menu-label">मुख्य मेनू</span>
+                <span class="menu-label">Main Menu</span>
                 
                 <a href="index.php" class="nav-item <?= $currentPage === 'index.php' ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-chart-pie"></i>
-                        <span>डैशबोर्ड (Dashboard)</span>
+                        <span>Dashboard</span>
                     </div>
                 </a>
 
                 <a href="visitors.php" class="nav-item <?= $currentPage === 'visitors.php' ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-chart-line" style="color: #38BDF8;"></i>
-                        <span>दैनिक विज़िटर्स (Visitors & Traffic)</span>
+                        <span>Visitors & Traffic</span>
                     </div>
                 </a>
 
-                <span class="menu-label">समाचार सामग्री (News CMS)</span>
+                <span class="menu-label">News CMS</span>
 
                 <a href="posts.php" class="nav-item <?= in_array($currentPage, ['posts.php']) ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-file-lines"></i>
-                        <span>सभी खबरें (All Posts)</span>
+                        <span>All Posts</span>
                     </div>
                 </a>
 
                 <a href="post-edit.php" class="nav-item <?= in_array($currentPage, ['post-edit.php']) && !isset($_GET['id']) ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-plus-circle"></i>
-                        <span>नई खबर जोड़ें (Add Post)</span>
+                        <span>Add New Post</span>
                     </div>
                 </a>
 
                 <a href="categories.php" class="nav-item <?= $currentPage === 'categories.php' ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-folder-tree"></i>
-                        <span>श्रेणियां (Categories)</span>
+                        <span>Categories</span>
                     </div>
                 </a>
 
                 <a href="live-bulletins.php" class="nav-item <?= $currentPage === 'live-bulletins.php' ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-tower-broadcast" style="color: var(--primary-red);"></i>
-                        <span>लाइव बुलेटिन (Live Stream)</span>
+                        <span>Live Stream Bulletins</span>
                     </div>
                 </a>
 
-                <span class="menu-label">संपादक एवं उपयोगकर्ता</span>
+                <span class="menu-label">Editors & Users</span>
 
                 <a href="users.php" class="nav-item <?= in_array($currentPage, ['users.php', 'user-edit.php']) ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-users-viewfinder"></i>
-                        <span>संपादक / यूज़र्स (Editors)</span>
+                        <span>Editors / Users</span>
                     </div>
                     <?php if ($totalUsersCount > 0): ?>
                         <span class="nav-badge"><?= $totalUsersCount ?></span>
                     <?php endif; ?>
                 </a>
 
-                <span class="menu-label">पेज एवं वेबसाइट सेटिंग</span>
+                <span class="menu-label">Pages & Site Settings</span>
 
                 <a href="pages.php" class="nav-item <?= in_array($currentPage, ['pages.php', 'page-edit.php']) ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-book-open"></i>
-                        <span>पेज CMS (About, Terms...)</span>
+                        <span>Page CMS (About, Terms...)</span>
                     </div>
                 </a>
 
                 <a href="settings.php" class="nav-item <?= $currentPage === 'settings.php' ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-sliders"></i>
-                        <span>साइट सेटिंग्स (Settings)</span>
+                        <span>Site Settings</span>
                     </div>
                 </a>
 
                 <a href="advertisements.php" class="nav-item <?= $currentPage === 'advertisements.php' ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-rectangle-ad"></i>
-                        <span>विज्ञापन प्रबंधन (Ads)</span>
+                        <span>Ads Management</span>
                     </div>
                 </a>
 
                 <a href="messages.php" class="nav-item <?= $currentPage === 'messages.php' ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-envelope-open-text"></i>
-                        <span>संपर्क संदेश (Messages)</span>
+                        <span>Contact Messages</span>
                     </div>
                     <?php if ($pendingMessages > 0): ?>
                         <span class="nav-badge"><?= $pendingMessages ?></span>
                     <?php endif; ?>
                 </a>
 
-                <span class="menu-label">अलर्ट एवं यूज़र्स</span>
+                <span class="menu-label">Alerts & Subscribers</span>
 
                 <a href="notifications.php" class="nav-item <?= $currentPage === 'notifications.php' ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-bell"></i>
-                        <span>पुश नोटिफिकेशन (Alerts)</span>
+                        <span>Push Notifications</span>
                     </div>
                 </a>
 
                 <a href="subscribers.php" class="nav-item <?= $currentPage === 'subscribers.php' ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-users-gear"></i>
-                        <span>सब्सक्राइबर्स (Subscribers)</span>
+                        <span>Subscribers</span>
                     </div>
                     <?php if ($totalSubscribers > 0): ?>
                         <span class="nav-badge"><?= $totalSubscribers ?></span>
@@ -1005,7 +1005,7 @@ if (isset($_SERVER['REQUEST_URI']) && preg_match('#^/admin(\?.*)?$#i', $_SERVER[
         <div class="sidebar-footer">
             <a href="<?= defined('APP_URL') ? APP_URL : '/' ?>" target="_blank" class="view-site-btn">
                 <i class="fas fa-arrow-up-right-from-square"></i>
-                <span>वेबसाइट लाइव देखें</span>
+                <span>View Live Website</span>
             </a>
         </div>
     </aside>
@@ -1018,26 +1018,26 @@ if (isset($_SERVER['REQUEST_URI']) && preg_match('#^/admin(\?.*)?$#i', $_SERVER[
                 <button type="button" class="btn-icon" id="sidebarToggleBtn" style="display: none;" aria-label="Toggle Menu">
                     <i class="fas fa-bars"></i>
                 </button>
-                <h1 class="topbar-title"><?= $adminHeading ?? 'एडमिन डैशबोर्ड' ?></h1>
+                <h1 class="topbar-title"><?= $adminHeading ?? 'Admin Dashboard' ?></h1>
             </div>
             <div class="topbar-right">
                 <a href="/admin/post-edit.php" class="topbar-btn">
                     <i class="fas fa-plus"></i>
-                    <span>नई खबर जोड़ें</span>
+                    <span>Add New Post</span>
                 </a>
                 
-                <a href="/admin/profile.php" class="topbar-btn topbar-btn-secondary" title="मेरी प्रोफाइल (<?= sanitize($currentUser['name']) ?>)">
+                <a href="/admin/profile.php" class="topbar-btn topbar-btn-secondary" title="My Profile (<?= sanitize($currentUser['name']) ?>)">
                     <i class="fas fa-user-circle"></i>
                     <span><?= sanitize($currentUser['name']) ?></span>
                 </a>
 
                 <?php if ($isAdmin): ?>
-                    <a href="/admin/settings.php" class="topbar-btn topbar-btn-secondary" title="सेटिंग्स">
+                    <a href="/admin/settings.php" class="topbar-btn topbar-btn-secondary" title="Settings">
                         <i class="fas fa-gear"></i>
                     </a>
                 <?php endif; ?>
 
-                <a href="/admin/logout.php" class="topbar-btn topbar-btn-secondary" title="लॉगआउट करें (Logout)" style="color: #DC2626; border-color: #FECACA; background: #FEF2F2;" onclick="return confirm('क्या आप वाकई लॉगआउट करना चाहते हैं?')">
+                <a href="/admin/logout.php" class="topbar-btn topbar-btn-secondary" title="Logout" style="color: #DC2626; border-color: #FECACA; background: #FEF2F2;" onclick="return confirm('Are you sure you want to log out?')">
                     <i class="fas fa-power-off"></i>
                 </a>
             </div>

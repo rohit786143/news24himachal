@@ -19,8 +19,8 @@ if (sidebarToggleBtn && adminSidebar) {
 }
 
 // Global Delete Confirmation
-function confirmDelete(url, itemLabel = 'इस आइटम') {
-    if (confirm(`क्या आप वाकई ${itemLabel} को हटाना (Delete) चाहते हैं? यह क्रिया वापस नहीं ली जा सकती।`)) {
+function confirmDelete(url, itemLabel = 'this item') {
+    if (confirm(`Are you sure you want to delete ${itemLabel}? This action cannot be undone.`)) {
         window.location.href = url;
     }
 }
