@@ -445,27 +445,96 @@ function getRecentNews($pdo, $limit = 5) {
 }
 
 /**
- * Get Article by Slug
+ * Get Article by Slug or ID (Ultra-Resilient)
  */
 function getArticleBySlug($pdo, $slug) {
+    if (!$pdo || empty($slug)) return null;
+    $slug = trim((string)$slug);
+
     try {
+        // 1. Primary Attempt by Slug with Safe LEFT JOINs
         $stmt = $pdo->prepare("
             SELECT n.*, 
-                   c.name AS category_name, c.slug AS category_slug, 
+                   COALESCE(c.name, 'ताज़ा खबर') AS category_name, 
+                   COALESCE(c.slug, 'himachal') AS category_slug, 
                    sub.name AS subcategory_name, sub.slug AS subcategory_slug,
-                   u.id AS editor_id, u.name AS editor_name, u.avatar AS editor_avatar,
-                   u.designation AS editor_designation, u.bio AS editor_bio,
-                   u.location AS editor_location, u.username AS editor_username
+                   u.id AS editor_id, 
+                   COALESCE(u.name, n.author, 'न्यूज़ डेस्क') AS editor_name, 
+                   u.avatar AS editor_avatar,
+                   u.designation AS editor_designation, 
+                   u.bio AS editor_bio,
+                   u.location AS editor_location, 
+                   u.username AS editor_username
             FROM news n
-            JOIN categories c ON n.category_id = c.id
+            LEFT JOIN categories c ON n.category_id = c.id
             LEFT JOIN categories sub ON n.subcategory_id = sub.id
-            LEFT JOIN users u ON n.author_id = u.id
+            LEFT JOIN users u ON (u.name = n.author OR u.username = n.author)
             WHERE n.slug = ?
             LIMIT 1
         ");
         $stmt->execute([$slug]);
-        return $stmt->fetch();
+        $res = $stmt->fetch();
+        if ($res) return $res;
+
+        // 2. Fallback: Search by ID if numeric
+        if (is_numeric($slug)) {
+            $stmtId = $pdo->prepare("
+                SELECT n.*, 
+                       COALESCE(c.name, 'ताज़ा खबर') AS category_name, 
+                       COALESCE(c.slug, 'himachal') AS category_slug, 
+                       sub.name AS subcategory_name, sub.slug AS subcategory_slug,
+                       u.id AS editor_id, 
+                       COALESCE(u.name, n.author, 'न्यूज़ डेस्क') AS editor_name, 
+                       u.avatar AS editor_avatar,
+                       u.designation AS editor_designation, 
+                       u.bio AS editor_bio,
+                       u.location AS editor_location, 
+                       u.username AS editor_username
+                FROM news n
+                LEFT JOIN categories c ON n.category_id = c.id
+                LEFT JOIN categories sub ON n.subcategory_id = sub.id
+                LEFT JOIN users u ON (u.name = n.author OR u.username = n.author)
+                WHERE n.id = ?
+                LIMIT 1
+            ");
+            $stmtId->execute([(int)$slug]);
+            $resId = $stmtId->fetch();
+            if ($resId) return $resId;
+        }
+
+        // 3. Fallback: Like search by slug if trailing slashes or special chars
+        $stmtLike = $pdo->prepare("SELECT * FROM `news` WHERE `slug` LIKE ? LIMIT 1");
+        $stmtLike->execute(['%' . $slug . '%']);
+        $rawArt = $stmtLike->fetch();
+        if ($rawArt) {
+            $rawArt['category_name'] = 'ताज़ा खबर';
+            $rawArt['category_slug'] = 'himachal';
+            $rawArt['subcategory_name'] = null;
+            $rawArt['subcategory_slug'] = null;
+            $rawArt['editor_name'] = $rawArt['author'] ?? 'न्यूज़ डेस्क';
+            $rawArt['editor_avatar'] = 'assets/images/author_placeholder.jpg';
+            $rawArt['editor_designation'] = 'संवाददाता';
+            return $rawArt;
+        }
+
+        return null;
     } catch (PDOException $e) {
+        // Ultra-safe minimal query fallback
+        try {
+            $simpleStmt = $pdo->prepare("SELECT * FROM `news` WHERE `slug` = ? OR `id` = ? LIMIT 1");
+            $simpleStmt->execute([$slug, is_numeric($slug) ? (int)$slug : 0]);
+            $art = $simpleStmt->fetch();
+            if ($art) {
+                $art['category_name'] = 'ताज़ा खबर';
+                $art['category_slug'] = 'himachal';
+                $art['subcategory_name'] = null;
+                $art['subcategory_slug'] = null;
+                $art['editor_name'] = $art['author'] ?? 'न्यूज़ डेस्क';
+                $art['editor_avatar'] = 'assets/images/author_placeholder.jpg';
+                $art['editor_designation'] = 'संवाददाता';
+                return $art;
+            }
+        } catch (Exception $e2) {}
         return null;
     }
 }

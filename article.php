@@ -8,7 +8,7 @@ require_once __DIR__ . '/config/db.php';
 require_once __DIR__ . '/includes/functions.php';
 
 $pdo = getDBConnection();
-$slug = isset($_GET['slug']) ? sanitize($_GET['slug']) : '';
+$slug = trim((string)($_GET['slug'] ?? ($_GET['id'] ?? '')));
 
 $article = getArticleBySlug($pdo, $slug);
 
