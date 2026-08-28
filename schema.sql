@@ -139,8 +139,7 @@ CREATE TABLE IF NOT EXISTS `news` (
     `is_breaking` TINYINT(1) DEFAULT 0,
     `is_featured` TINYINT(1) DEFAULT 0,
     `is_trending` TINYINT(1) DEFAULT 0,
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT `fk_news_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     CONSTRAINT `fk_news_subcategory` FOREIGN KEY (`subcategory_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL,
     INDEX `idx_news_breaking` (`is_breaking`),
     INDEX `idx_news_created` (`created_at`),
