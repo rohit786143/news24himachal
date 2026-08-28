@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     $_SESSION['flash_message'] = "संपादक '<strong>" . sanitize($name) . "</strong>' का विवरण सफलतापूर्वक अपडेट कर दिया गया!";
                     $_SESSION['flash_type'] = "success";
-                    header("Location: /admin/users.php");
+                    header("Location: users.php");
                     exit;
                 } else {
                     // Create New Editor
@@ -130,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     $_SESSION['flash_message'] = "नया संपादक '<strong>" . sanitize($name) . "</strong>' सफलतापूर्वक पंजीकृत कर दिया गया!";
                     $_SESSION['flash_type'] = "success";
-                    header("Location: /admin/users.php");
+                    header("Location: users.php");
                     exit;
                 }
             } catch (PDOException $e) {

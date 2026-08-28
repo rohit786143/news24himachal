@@ -25,6 +25,7 @@ if (!$user) {
 // Handle Profile Update
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
+    $username = strtolower(trim($_POST['username'] ?? ''));
     $email = strtolower(trim($_POST['email'] ?? ''));
     $designation = trim($_POST['designation'] ?? '');
     $location = trim($_POST['location'] ?? '');
@@ -44,14 +45,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $currentPass = trim($_POST['current_password'] ?? '');
     $newPass = trim($_POST['new_password'] ?? '');
 
-    if (empty($name) || empty($email)) {
-        $error = "कृपया नाम और ईमेल आईडी दर्ज करें।";
+    if (empty($name) || empty($username) || empty($email)) {
+        $error = "कृपया नाम, यूज़रनेम और ईमेल आईडी दर्ज करें।";
     } else {
-        // Check email uniqueness
-        $emailCheck = $pdo->prepare("SELECT id FROM `users` WHERE `email` = ? AND `id` != ?");
-        $emailCheck->execute([$email, $currentUserId]);
-        if ($emailCheck->fetch()) {
-            $error = "यह ईमेल आईडी पहले से किसी अन्य खाते से जुड़ी है।";
+        // Check username and email uniqueness
+        $dupCheck = $pdo->prepare("SELECT id FROM `users` WHERE (`email` = ? OR `username` = ?) AND `id` != ?");
+        $dupCheck->execute([$email, $username, $currentUserId]);
+        if ($dupCheck->fetch()) {
+            $error = "यह यूज़रनेम या ईमेल आईडी पहले से किसी अन्य खाते से जुड़ी है।";
         } else {
             try {
                 // If user wants to change password
@@ -62,51 +63,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $passHash = password_hash($newPass, PASSWORD_BCRYPT);
                         $stmt = $pdo->prepare("
                             UPDATE `users` SET
-                                `name` = ?, `email` = ?, `designation` = ?, `location` = ?,
+                                `name` = ?, `username` = ?, `email` = ?, `designation` = ?, `location` = ?,
                                 `avatar` = ?, `bio` = ?, `social_twitter` = ?, `social_facebook` = ?,
                                 `password` = ?
                             WHERE `id` = ?
                         ");
                         $stmt->execute([
-                            $name, $email, $designation, $location,
+                            $name, $username, $email, $designation, $location,
                             $avatar, $bio, $twitter, $facebook,
                             $passHash, $currentUserId
                         ]);
 
                         // Update session
                         $_SESSION['admin_user']['name'] = $name;
+                        $_SESSION['admin_user']['username'] = $username;
                         $_SESSION['admin_user']['email'] = $email;
                         $_SESSION['admin_user']['avatar'] = $avatar;
                         $_SESSION['admin_user']['designation'] = $designation;
 
-                        $_SESSION['flash_message'] = "आपकी प्रोफाइल और पासवर्ड सफलतापूर्वक अपडेट कर दिए गए हैं!";
+                        $_SESSION['flash_message'] = "आपकी प्रोफाइल, यूज़रनेम और पासवर्ड सफलतापूर्वक अपडेट कर दिए गए हैं!";
                         $_SESSION['flash_type'] = "success";
-                        header("Location: /admin/profile.php");
+                        header("Location: profile.php");
                         exit;
                     }
                 } else {
                     // Update without changing password
                     $stmt = $pdo->prepare("
                         UPDATE `users` SET
-                            `name` = ?, `email` = ?, `designation` = ?, `location` = ?,
+                            `name` = ?, `username` = ?, `email` = ?, `designation` = ?, `location` = ?,
                             `avatar` = ?, `bio` = ?, `social_twitter` = ?, `social_facebook` = ?
                         WHERE `id` = ?
                     ");
                     $stmt->execute([
-                        $name, $email, $designation, $location,
+                        $name, $username, $email, $designation, $location,
                         $avatar, $bio, $twitter, $facebook,
                         $currentUserId
                     ]);
 
                     // Update session
                     $_SESSION['admin_user']['name'] = $name;
+                    $_SESSION['admin_user']['username'] = $username;
                     $_SESSION['admin_user']['email'] = $email;
                     $_SESSION['admin_user']['avatar'] = $avatar;
                     $_SESSION['admin_user']['designation'] = $designation;
 
-                    $_SESSION['flash_message'] = "आपकी प्रोफाइल सफलतापूर्वक अपडेट कर दी गई है!";
+                    $_SESSION['flash_message'] = "आपकी प्रोफाइल एवं यूज़रनेम सफलतापूर्वक अपडेट कर दिया गया है!";
                     $_SESSION['flash_type'] = "success";
-                    header("Location: /admin/profile.php");
+                    header("Location: profile.php");
                     exit;
                 }
             } catch (PDOException $e) {
@@ -118,13 +121,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <?php if ($error): ?>
-    <div class="alert alert-danger">
-        <div><i class="fas fa-triangle-exclamation"></i> <?= sanitize($error) ?></div>
-        <button type="button" onclick="this.parentElement.remove()" style="background:none;border:none;color:inherit;cursor:pointer;"><i class="fas fa-times"></i></button>
+    <div class="alert alert-danger" style="margin-bottom: 20px;">
+        <i class="fas fa-triangle-exclamation"></i> <?= sanitize($error) ?>
     </div>
 <?php endif; ?>
 
-<form method="POST" action="/admin/profile.php" enctype="multipart/form-data">
+<form method="POST" action="profile.php" enctype="multipart/form-data">
     <div style="display: grid; grid-template-columns: 2.2fr 1fr; gap: 24px;">
         
         <!-- Left: Profile Info -->
@@ -146,16 +148,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <label class="form-label" for="profileDesignation">पदनाम (Designation / Bureau)</label>
                             <input type="text" id="profileDesignation" name="designation" class="form-control" 
                                    value="<?= sanitize($user['designation']) ?>" 
-                                   placeholder="उदा: केलांग संवाददाता • News 24 Himachal">
+                                   placeholder="उदा: मुख्य संपादक • News 24 Himachal">
                         </div>
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                         <div class="form-group">
-                            <label class="form-label" for="profileUsername">लॉगिन यूज़रनेम (Read Only)</label>
-                            <input type="text" id="profileUsername" class="form-control" 
-                                   value="<?= sanitize($user['username']) ?>" disabled 
-                                   style="background: #F8FAFC; color: var(--text-muted); cursor: not-allowed;">
+                            <label class="form-label" for="profileUsername">लॉगिन यूज़रनेम (Username) <span class="required">*</span></label>
+                            <input type="text" id="profileUsername" name="username" class="form-control" 
+                                   value="<?= sanitize($user['username']) ?>" required>
                         </div>
 
                         <div class="form-group">

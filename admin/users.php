@@ -60,7 +60,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'toggle_status' && isset($_GET
         $_SESSION['flash_message'] = "यूज़र की स्थिति '{$newStatus}' में बदल दी गई है।";
         $_SESSION['flash_type'] = "success";
     }
-    header("Location: /admin/users.php");
+    header("Location: users.php");
     exit;
 }
 
@@ -69,12 +69,12 @@ $adminHeading = 'संपादक एवं रिपोर्टर प्र
 
 require_once __DIR__ . '/includes/header.php';
 
-// Fetch all users with their article count
+// Fetch all users safely
 $users = $pdo->query("
-    SELECT u.*, COUNT(n.id) as article_count, COALESCE(SUM(n.views), 0) as total_views
+    SELECT u.*,
+        (SELECT COUNT(*) FROM `news` WHERE `author` = u.name OR `author` = u.username) as article_count,
+        (SELECT COALESCE(SUM(views), 0) FROM `news` WHERE `author` = u.name OR `author` = u.username) as total_views
     FROM `users` u
-    LEFT JOIN `news` n ON u.id = n.author_id
-    GROUP BY u.id
     ORDER BY (u.role = 'admin') DESC, u.created_at DESC
 ")->fetchAll();
 ?>
@@ -85,12 +85,17 @@ $users = $pdo->query("
         <h3 style="font-size: 1.1rem; color: var(--text-heading); font-weight: 800;">
             <i class="fas fa-users-viewfinder" style="color: var(--primary);"></i> पंजीकृत संवाददाता एवं एडमिन (Total: <?= count($users) ?>)
         </h3>
-        <p style="font-size: 0.84rem; color: var(--text-muted);">यहाँ से आप नए संपादकों को जोड़ सकते हैं और उनके पोस्ट्स के अधिकार प्रबंधित कर सकते हैं।</p>
+        <p style="font-size: 0.84rem; color: var(--text-muted);">यहाँ से आप नए संपादकों को जोड़ सकते हैं, किसी भी यूज़र का पासवर्ड रीसेट कर सकते हैं और अधिकार प्रबंधित कर सकते हैं।</p>
     </div>
     
-    <a href="/admin/user-edit.php" class="topbar-btn" style="padding: 10px 18px;">
-        <i class="fas fa-user-plus"></i> नया संपादक जोड़ें (Add New Editor)
-    </a>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <a href="profile.php" class="topbar-btn topbar-btn-secondary" style="padding: 10px 16px;">
+            <i class="fas fa-key"></i> मेरा पासवर्ड / यूज़रनेम बदलें
+        </a>
+        <a href="user-edit.php" class="topbar-btn" style="padding: 10px 18px;">
+            <i class="fas fa-user-plus"></i> + नया संपादक जोड़ें (Add Editor)
+        </a>
+    </div>
 </div>
 
 <!-- Users Table Panel -->
@@ -169,22 +174,22 @@ $users = $pdo->query("
                             </td>
                             <td>
                                 <?php if ($u['status'] === 'active'): ?>
-                                    <a href="/admin/users.php?action=toggle_status&id=<?= $u['id'] ?>" class="badge badge-green" style="text-decoration: none;" title="क्लिक कर निष्क्रिय करें">
+                                    <a href="users.php?action=toggle_status&id=<?= $u['id'] ?>" class="badge badge-green" style="text-decoration: none;" title="क्लिक कर निष्क्रिय करें">
                                         <i class="fas fa-check-circle"></i> सक्रिय (Active)
                                     </a>
                                 <?php else: ?>
-                                    <a href="/admin/users.php?action=toggle_status&id=<?= $u['id'] ?>" class="badge badge-red" style="text-decoration: none;" title="क्लिक कर सक्रिय करें">
+                                    <a href="users.php?action=toggle_status&id=<?= $u['id'] ?>" class="badge badge-red" style="text-decoration: none;" title="क्लिक कर सक्रिय करें">
                                         <i class="fas fa-ban"></i> निष्क्रिय (Inactive)
                                     </a>
                                 <?php endif; ?>
                             </td>
                             <td>
                                 <div class="action-btns" style="justify-content: flex-end;">
-                                    <a href="/admin/user-edit.php?id=<?= $u['id'] ?>" class="btn-icon btn-icon-edit" title="एडिट करें">
+                                    <a href="user-edit.php?id=<?= $u['id'] ?>" class="btn-icon btn-icon-edit" title="एडिट करें व पासवर्ड बदलें">
                                         <i class="fas fa-pencil"></i>
                                     </a>
                                     <?php if ($u['id'] != $currentUserId): ?>
-                                        <button type="button" class="btn-icon btn-icon-delete" title="हटाएं" onclick="confirmDelete('/admin/users.php?action=delete&id=<?= $u['id'] ?>', 'इस संपादक')">
+                                        <button type="button" class="btn-icon btn-icon-delete" title="हटाएं" onclick="confirmDelete('users.php?action=delete&id=<?= $u['id'] ?>', 'इस संपादक')">
                                             <i class="fas fa-trash-can"></i>
                                         </button>
                                     <?php endif; ?>
