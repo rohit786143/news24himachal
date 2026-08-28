@@ -327,6 +327,11 @@ if ($isEditor) {
             <div class="stat-info">
                 <h4>कुल पाठक व्यूज (Views)</h4>
                 <div class="stat-number"><?= number_format($totalViews) ?></div>
+                <div style="margin-top: 4px;">
+                    <a href="reset-views.php" onclick="return confirm('क्या आप वाकई सभी खबरों के व्यूज काउंट को 0 पर रीसेट करना चाहते हैं? इसके बाद केवल नए लाइव विज़िटर्स के व्यूज गिने जाएंगे।');" style="font-size: 0.75rem; color: #DC2626; font-weight: 700; text-decoration: none;">
+                        <i class="fas fa-rotate-right"></i> व्यूज 0 रीसेट करें
+                    </a>
+                </div>
             </div>
             <div class="stat-icon-wrap stat-icon-blue">
                 <i class="fas fa-eye"></i>
@@ -356,13 +361,13 @@ if ($isEditor) {
 
     <!-- Quick Action Shortcuts for Admin -->
     <div style="display: flex; gap: 12px; margin-bottom: 30px; flex-wrap: wrap;">
-        <a href="/admin/post-edit.php" class="topbar-btn" style="padding: 10px 18px;">
+        <a href="post-edit.php" class="topbar-btn" style="padding: 10px 18px;">
             <i class="fas fa-plus-circle"></i> नई खबर लिखें (Add Post)
         </a>
-        <a href="/admin/posts.php" class="topbar-btn topbar-btn-secondary" style="padding: 10px 18px;">
+        <a href="posts.php" class="topbar-btn topbar-btn-secondary" style="padding: 10px 18px;">
             <i class="fas fa-file-lines"></i> सभी खबरें प्रबंधित करें
         </a>
-        <a href="/admin/users.php" class="topbar-btn topbar-btn-secondary" style="padding: 10px 18px;">
+        <a href="users.php" class="topbar-btn topbar-btn-secondary" style="padding: 10px 18px;">
             <i class="fas fa-users-gear"></i> संपादक / यूज़र्स
         </a>
         <a href="/admin/categories.php" class="topbar-btn topbar-btn-secondary" style="padding: 10px 18px;">
