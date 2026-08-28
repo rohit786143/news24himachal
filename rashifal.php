@@ -252,25 +252,24 @@ require_once __DIR__ . '/includes/header.php';
 </style>
 
 <main>
-    <!-- Standard Clean Category Header -->
-    <section class="category-hero-header">
-        <div class="container">
-            <div class="breadcrumbs" style="color: #A0AEC0;">
-                <a href="index.php" style="color: #CBD5E0;">होम</a>
-                <span class="separator">&gt;</span>
-                <span style="color: var(--white); font-weight: 600;">राशिफल</span>
-            </div>
-            <h1 class="category-hero-title">राशिफल (दैनिक भविष्यफल)</h1>
-            <p style="color: #CBD5E0; font-size: 0.95rem;">
-                <?= $formattedHindiDate ?> • सभी 12 राशियों का आज का संपूर्ण भविष्यफल
-            </p>
-        </div>
-    </section>
-
-    <!-- Main Content & Aspect Cards (Full Width Layout - No Sidebar) -->
-    <div class="main-layout" style="padding: 15px 0 60px;">
+    <div class="main-layout" style="padding-top: 15px; padding-bottom: 60px;">
         <div class="container" style="max-width: 1050px; margin: 0 auto;">
-            
+            <!-- Compact Space-Saving Category Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; border-bottom: 2px solid #E2E8F0; padding-bottom: 12px;">
+                <div>
+                    <div class="breadcrumbs" style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 4px;">
+                        <a href="index.php" style="color: var(--text-muted); text-decoration: none;">होम</a>
+                        <span class="separator" style="margin: 0 4px;">&rsaquo;</span>
+                        <span style="color: var(--primary); font-weight: 700;">राशिफल</span>
+                    </div>
+                    <h1 style="font-size: 1.55rem; font-weight: 900; color: var(--text-heading); margin: 0; display: inline-flex; align-items: center; gap: 8px;">
+                        <span style="display: inline-block; width: 4px; height: 22px; background: var(--primary); border-radius: 2px;"></span>
+                        दैनिक राशिफल (Daily Horoscope)
+                        <span style="font-size: 0.82rem; font-weight: normal; color: var(--text-muted); margin-left: 6px;">(<?= $formattedHindiDate ?>)</span>
+                    </h1>
+                </div>
+            </div>
+
             <!-- Full Width Column: 12 Rashi Detail Cards -->
             <div style="width: 100%;">
                 

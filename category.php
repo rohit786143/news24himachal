@@ -51,36 +51,38 @@ require_once __DIR__ . '/includes/header.php';
 ?>
 
 <main>
-    <!-- Category Hero Header -->
-    <section class="category-hero-header">
+    <div class="main-layout" style="padding-top: 15px;">
         <div class="container">
-            <div class="breadcrumbs" style="color: #A0AEC0;">
-                <a href="index.php" style="color: #CBD5E0;">होम</a>
-                <span class="separator">&gt;</span>
-                <?php if ($subCategory && $category): ?>
-                    <a href="category.php?cat=<?= urlencode($category['slug']) ?>" style="color: #CBD5E0;"><?= sanitize($category['name']) ?></a>
-                    <span class="separator">&gt;</span>
-                    <span style="color: var(--white); font-weight: 600;"><?= sanitize($subCategory['name']) ?></span>
-                <?php else: ?>
-                    <span style="color: var(--white); font-weight: 600;"><?= sanitize($pageHeading) ?></span>
-                <?php endif; ?>
-            </div>
+            <!-- Compact Space-Saving Category Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; border-bottom: 2px solid #E2E8F0; padding-bottom: 12px;">
+                <div>
+                    <div class="breadcrumbs" style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 4px;">
+                        <a href="index.php" style="color: var(--text-muted); text-decoration: none;">होम</a>
+                        <span class="separator" style="margin: 0 4px;">&rsaquo;</span>
+                        <?php if ($subCategory && $category): ?>
+                            <a href="category.php?cat=<?= urlencode($category['slug']) ?>" style="color: var(--text-muted); text-decoration: none;"><?= sanitize($category['name']) ?></a>
+                            <span class="separator" style="margin: 0 4px;">&rsaquo;</span>
+                            <span style="color: var(--primary); font-weight: 700;"><?= sanitize($subCategory['name']) ?></span>
+                        <?php else: ?>
+                            <span style="color: var(--primary); font-weight: 700;"><?= sanitize($pageHeading) ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <h1 style="font-size: 1.55rem; font-weight: 900; color: var(--text-heading); margin: 0; display: inline-flex; align-items: center; gap: 8px;">
+                        <span style="display: inline-block; width: 4px; height: 22px; background: var(--primary); border-radius: 2px;"></span>
+                        <?= sanitize($pageHeading) ?>
+                        <span style="font-size: 0.82rem; font-weight: normal; color: var(--text-muted); margin-left: 6px;">(कुल <?= number_format($totalArticles) ?> खबरें)</span>
+                    </h1>
+                </div>
 
-            <h1 class="category-hero-title"><?= sanitize($pageHeading) ?></h1>
-            <p style="color: #CBD5E0; font-size: 0.95rem;">
-                कुल <?= number_format($totalArticles) ?> समाचार उपलब्ध
-            </p>
-
-            <!-- Subcategory Dropdown Filter (Dropdown List for Districts & Sub-categories) -->
-            <?php if (!empty($category['subcategories'])): ?>
-                <div class="category-dropdown-wrapper">
-                    <label for="subcategorySelect" class="category-dropdown-label">
-                        <i class="fas fa-map-marker-alt"></i> जिला / उप-श्रेणी चुनें:
-                    </label>
-                    <div class="category-select-box">
-                        <select id="subcategorySelect" class="category-dropdown-select" onchange="if (this.value) window.location.href=this.value;">
+                <!-- Subcategory / District Dropdown Filter -->
+                <?php if (!empty($category['subcategories'])): ?>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <label for="subcategorySelect" style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); white-space: nowrap;">
+                            <i class="fas fa-map-marker-alt" style="color: var(--primary);"></i> जिला / उप-श्रेणी:
+                        </label>
+                        <select id="subcategorySelect" class="form-control" onchange="if (this.value) window.location.href=this.value;" style="padding: 6px 12px; font-size: 0.85rem; height: auto; border-radius: 6px; width: auto; min-width: 180px;">
                             <option value="category.php?cat=<?= urlencode($category['slug']) ?>" <?= empty($subSlug) ? 'selected' : '' ?>>
-                                📁 सभी <?= sanitize($category['name']) ?> (सभी जिले)
+                                📁 सभी <?= sanitize($category['name']) ?>
                             </option>
                             <?php foreach ($category['subcategories'] as $sub): ?>
                                 <option value="category.php?cat=<?= urlencode($category['slug']) ?>&sub=<?= urlencode($sub['slug']) ?>" 
@@ -89,24 +91,12 @@ require_once __DIR__ . '/includes/header.php';
                                 </option>
                             <?php endforeach; ?>
                         </select>
-                        <i class="fas fa-chevron-down category-select-arrow"></i>
                     </div>
-
-                    <?php if ($subCategory): ?>
-                        <div class="active-subcat-indicator">
-                            <span class="active-subcat-badge">
-                                सक्रिय जिला: <strong><?= sanitize($subCategory['name']) ?></strong>
-                                <a href="category.php?cat=<?= urlencode($category['slug']) ?>" title="हटाएं व सभी देखें"><i class="fas fa-times"></i></a>
-                            </span>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            <?php endif; ?>
+                <?php endif; ?>
+            </div>
         </div>
-    </section>
 
-    <!-- Content & Sidebar Grid -->
-    <div class="main-layout">
+        <!-- Content & Sidebar Grid -->
         <div class="container content-grid">
             
             <div class="main-content-column">
