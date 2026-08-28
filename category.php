@@ -11,6 +11,12 @@ $pdo = getDBConnection();
 
 $categorySlug = isset($_GET['cat']) ? sanitize($_GET['cat']) : '';
 $subSlug = isset($_GET['sub']) ? sanitize($_GET['sub']) : null;
+
+// Route Rashifal category directly to the rich 12-Rashi Daily Horoscope Hub
+if ($categorySlug === 'rashiphal' || $categorySlug === 'rashifal') {
+    require_once __DIR__ . '/rashifal.php';
+    exit;
+}
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $perPage = 6;
 $offset = ($page - 1) * $perPage;
