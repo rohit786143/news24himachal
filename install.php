@@ -49,6 +49,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['auto'])) {
                 INSERT INTO `news` (`category_id`, `subcategory_id`, `title`, `slug`, `excerpt`, `content`, `image_url`, `author`, `views`, `is_breaking`, `is_featured`, `is_trending`, `created_at`)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW() - INTERVAL FLOOR(RAND()*72) HOUR)
                 ON DUPLICATE KEY UPDATE 
+                    `category_id` = VALUES(`category_id`),
+                    `subcategory_id` = VALUES(`subcategory_id`),
                     `title` = VALUES(`title`),
                     `excerpt` = VALUES(`excerpt`),
                     `content` = VALUES(`content`),

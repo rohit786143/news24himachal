@@ -8,6 +8,9 @@ if (!defined('APP_NAME')) {
     define('APP_NAME', 'News 24 Himachal');
 }
 define('APP_TAGLINE', 'हिमाचल प्रदेश का नंबर 1 हिंदी न्यूज़ पोर्टल');
+define('APP_EMAIL', 'editor@news24himachal.com');
+define('APP_PHONE', '+91 177 265 8900');
+define('APP_ADDRESS', 'प्रेस एवेन्यू, माल रोड, शिमला, हिमाचल प्रदेश - 171001');
 // Multi-Environment Detection (Local XAMPP vs Hostinger Live)
 $isLocalEnv = (
     (isset($_SERVER['HTTP_HOST']) && (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false || strpos($_SERVER['HTTP_HOST'], '127.0.0.1') !== false))

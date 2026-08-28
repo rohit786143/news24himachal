@@ -320,20 +320,34 @@ function getTrendingNews($pdo, $limit = 4, $excludeId = 0) {
 function getNewsByCategorySlug($pdo, $categorySlug, $limit = 6, $offset = 0, $subSlug = null) {
     try {
         $params = [];
+        $where = [];
+
+        if (!empty($categorySlug) && !empty($subSlug)) {
+            $where[] = "(c.slug = ? OR sub.slug = ? OR c.id = (SELECT parent_id FROM categories WHERE slug = ? LIMIT 1))";
+            $params[] = $categorySlug;
+            $params[] = $categorySlug;
+            $params[] = $subSlug;
+            $where[] = "sub.slug = ?";
+            $params[] = $subSlug;
+        } elseif (!empty($subSlug)) {
+            $where[] = "sub.slug = ?";
+            $params[] = $subSlug;
+        } elseif (!empty($categorySlug)) {
+            $where[] = "(c.slug = ? OR sub.slug = ?)";
+            $params[] = $categorySlug;
+            $params[] = $categorySlug;
+        }
+
         $sql = "
             SELECT n.*, c.name AS category_name, c.slug AS category_slug, 
                    sub.name AS subcategory_name, sub.slug AS subcategory_slug
             FROM news n
             JOIN categories c ON n.category_id = c.id
             LEFT JOIN categories sub ON n.subcategory_id = sub.id
-            WHERE (c.slug = ? OR sub.slug = ?)
         ";
-        $params[] = $categorySlug;
-        $params[] = $categorySlug;
 
-        if ($subSlug) {
-            $sql .= " AND sub.slug = ?";
-            $params[] = $subSlug;
+        if (!empty($where)) {
+            $sql .= " WHERE " . implode(" AND ", $where);
         }
 
         $sql .= " ORDER BY n.created_at DESC LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
@@ -352,19 +366,33 @@ function getNewsByCategorySlug($pdo, $categorySlug, $limit = 6, $offset = 0, $su
 function countNewsByCategorySlug($pdo, $categorySlug, $subSlug = null) {
     try {
         $params = [];
+        $where = [];
+
+        if (!empty($categorySlug) && !empty($subSlug)) {
+            $where[] = "(c.slug = ? OR sub.slug = ? OR c.id = (SELECT parent_id FROM categories WHERE slug = ? LIMIT 1))";
+            $params[] = $categorySlug;
+            $params[] = $categorySlug;
+            $params[] = $subSlug;
+            $where[] = "sub.slug = ?";
+            $params[] = $subSlug;
+        } elseif (!empty($subSlug)) {
+            $where[] = "sub.slug = ?";
+            $params[] = $subSlug;
+        } elseif (!empty($categorySlug)) {
+            $where[] = "(c.slug = ? OR sub.slug = ?)";
+            $params[] = $categorySlug;
+            $params[] = $categorySlug;
+        }
+
         $sql = "
             SELECT COUNT(*) AS total
             FROM news n
             JOIN categories c ON n.category_id = c.id
             LEFT JOIN categories sub ON n.subcategory_id = sub.id
-            WHERE (c.slug = ? OR sub.slug = ?)
         ";
-        $params[] = $categorySlug;
-        $params[] = $categorySlug;
 
-        if ($subSlug) {
-            $sql .= " AND sub.slug = ?";
-            $params[] = $subSlug;
+        if (!empty($where)) {
+            $sql .= " WHERE " . implode(" AND ", $where);
         }
 
         $stmt = $pdo->prepare($sql);

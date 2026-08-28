@@ -715,9 +715,10 @@ ul, ol {
 
 .hero-grid {
     display: grid;
-    grid-template-columns: 1.18fr 1.02fr 0.8fr;
+    grid-template-columns: minmax(0, 1.22fr) minmax(0, 1fr) minmax(0, 0.8fr);
     gap: 12px;
     align-items: stretch;
+    width: 100%;
 }
 
 /* Big Lead Card ("सबसे बड़ी खबर" - Interactive Auto-Slider) */
@@ -1327,13 +1328,28 @@ ul, ol {
    Main Content & Category Sections Layout
    ========================================================================== */
 .main-layout {
-    padding: 24px 0 40px;
+    padding: 20px 0 40px;
+    width: 100%;
 }
 
 .content-grid {
     display: grid;
-    grid-template-columns: 2.2fr 1fr;
-    gap: 30px;
+    grid-template-columns: minmax(0, 1fr) 330px;
+    gap: 28px;
+    align-items: start;
+    width: 100%;
+}
+
+.main-content-column {
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+}
+
+.sidebar-column, .sidebar-col {
+    min-width: 0;
+    max-width: 330px;
+    width: 100%;
 }
 
 /* Section Header Styles */
@@ -2920,21 +2936,42 @@ a.district-tab:hover {
 }
 
 /* ==========================================================================
-   Responsive Breakpoints
-   ========================================================================== */
-/* ==========================================================================
    Responsive Breakpoints & Mobile Optimization
    ========================================================================== */
 body {
     padding-bottom: 48px; /* Offset for fixed bottom breaking ticker */
 }
 
+@media (max-width: 1200px) {
+    .container {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+    .content-grid {
+        grid-template-columns: minmax(0, 1fr) 300px;
+        gap: 20px;
+    }
+    .sidebar-column, .sidebar-col {
+        max-width: 300px;
+    }
+    .cat-grid-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .darshan-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .hero-grid {
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 0.9fr);
+        gap: 10px;
+    }
+}
+
 @media (max-width: 1024px) {
     .hero-grid {
-        grid-template-columns: 1.2fr 1fr;
+        grid-template-columns: 1fr;
     }
     .hero-right-col {
-        grid-column: span 2;
+        grid-column: span 1;
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 14px;
@@ -2949,6 +2986,15 @@ body {
     }
     .content-grid {
         grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    .sidebar-column, .sidebar-col {
+        max-width: 100%;
+        width: 100%;
+    }
+    .sidebar {
+        max-width: 100%;
+        width: 100%;
     }
     .footer-grid {
         grid-template-columns: 1fr 1fr;
@@ -3950,7 +3996,7 @@ body {
     color: #94A3B8;
 }
 
-@media screen and (max-width: 992px) {
+@media screen and (max-width: 1200px) {
     .cat-grid-3 {
         grid-template-columns: repeat(2, 1fr);
     }
