@@ -1,3 +1,9 @@
+<?php
+/**
+ * Contact Messages Management
+ * News 24 Himachal
+ */
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }

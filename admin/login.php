@@ -15,7 +15,7 @@ $pdo = getDBConnection();
 
 // If already logged in, redirect to admin dashboard
 if (!empty($_SESSION['admin_user'])) {
-    header("Location: /admin/index.php");
+    header("Location: index.php");
     exit;
 }
 
@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['flash_message'] = "स्वागत है, <strong>" . sanitize($displayName) . "</strong>! आप सफलतापूर्वक लॉगिन हो चुके हैं।";
                 $_SESSION['flash_type'] = "success";
 
-                header("Location: /admin/index.php");
+                header("Location: index.php");
                 exit;
             } else {
                 $error = 'गलत यूज़रनेम या पासवर्ड! कृपया दोबारा जांचें।';

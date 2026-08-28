@@ -4,6 +4,9 @@
  * News 24 Himachal
  */
 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 if (!defined('APP_NAME')) {
     define('APP_NAME', 'News 24 Himachal');
 }
@@ -52,6 +55,15 @@ function getDBConnection() {
 
         try {
             $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+
+            // Auto-detect if database tables are installed, redirect to 1-click installer if empty
+            if (php_sapi_name() !== 'cli' && basename($_SERVER['PHP_SELF'] ?? '') !== 'install.php') {
+                $tableCheck = $pdo->query("SHOW TABLES LIKE 'categories'")->fetch();
+                if (!$tableCheck) {
+                    header("Location: install.php?auto=1");
+                    exit;
+                }
+            }
         } catch (PDOException $e) {
             // Check if database doesn't exist, redirect to installer if accessed via browser
             if ($e->getCode() == 1049 || strpos($e->getMessage(), 'Unknown database') !== false) {

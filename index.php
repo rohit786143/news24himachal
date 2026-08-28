@@ -4,6 +4,9 @@
  * News 24 Himachal
  */
 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 $pageTitle = 'News 24 Himachal - शिमला, कांगड़ा, मंडी और देवभूमि की ताज़ा ख़बरें';
 $pageDescription = 'News 24 Himachal - हिमाचल प्रदेश का नंबर 1 हिंदी न्यूज़ पोर्टल। ब्रेकिंग न्यूज़, शिमला, कांगड़ा, मंडी, देवभूमि दर्शन, राजनीति, संस्कृति और पर्यटन की हर ख़बर सबसे पहले।';
 
@@ -122,7 +125,7 @@ $entertainmentNews = getNewsByCategorySlug($pdo, 'manoranjan', 3);
                         
                         <div class="livetv-screen">
                             <iframe 
-                                src="<?= sanitize(getSetting($pdo, 'livetv_url', 'https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Fshare%2Fv%2F1MJyM4wWgR%2F&show_text=false&autoplay=true&mute=1&loop=true&width=500')) ?>" 
+                                src="<?= sanitize(getSetting($pdo, 'livetv_url', 'https://www.youtube-nocookie.com/embed/5qap5aO4i9A?autoplay=1&mute=1&enablejsapi=1')) ?>" 
                                 title="News 24 Himachal लाइव टीवी प्रसारण"
                                 allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" 
                                 allowfullscreen="true" 

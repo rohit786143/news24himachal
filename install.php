@@ -4,32 +4,64 @@
  * News 24 Himachal
  */
 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+if (file_exists(__DIR__ . '/config/db.php')) {
+    require_once __DIR__ . '/config/db.php';
+} else {
+    // Default Hostinger Live / Local Fallback Configuration
+    if (!defined('APP_NAME')) define('APP_NAME', 'News 24 Himachal');
+    if (!defined('APP_URL')) define('APP_URL', 'https://news24hp.com');
+    if (!defined('DB_HOST')) define('DB_HOST', 'localhost');
+    if (!defined('DB_PORT')) define('DB_PORT', '3306');
+    if (!defined('DB_NAME')) define('DB_NAME', 'u238667987_news24hp');
+    if (!defined('DB_USER')) define('DB_USER', 'u238667987_news24hp');
+    if (!defined('DB_PASS')) define('DB_PASS', 'Rohit@40014');
+}
+
 $status = [];
 $installed = false;
 $error = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['auto'])) {
-    $dbHost = $_POST['db_host'] ?? 'localhost';
-    $dbPort = $_POST['db_port'] ?? '3306';
-    $dbUser = $_POST['db_user'] ?? 'root';
-    $dbPass = $_POST['db_pass'] ?? '';
-    $dbName = $_POST['db_name'] ?? 'news_db';
+    $dbHost = !empty($_POST['db_host']) ? $_POST['db_host'] : (defined('DB_HOST') ? DB_HOST : 'localhost');
+    $dbPort = !empty($_POST['db_port']) ? $_POST['db_port'] : (defined('DB_PORT') ? DB_PORT : '3306');
+    $dbUser = !empty($_POST['db_user']) ? $_POST['db_user'] : (defined('DB_USER') ? DB_USER : 'root');
+    $dbPass = isset($_POST['db_pass']) ? $_POST['db_pass'] : (defined('DB_PASS') ? DB_PASS : '');
+    $dbName = !empty($_POST['db_name']) ? $_POST['db_name'] : (defined('DB_NAME') ? DB_NAME : 'news_db');
 
     try {
-        // Step 1: Connect to MySQL Server (without database)
-        $dsn = "mysql:host={$dbHost};port={$dbPort};charset=utf8mb4";
-        $pdo = new PDO($dsn, $dbUser, $dbPass, [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci"
-        ]);
-        $status[] = ['title' => 'MySQL सर्वर कनेक्शन', 'status' => 'success', 'msg' => "MySQL {$dbHost}:{$dbPort} से सफलतापूर्वक कनेक्ट हुआ।"];
+        // Step 1: Connect to Database (with dbname directly for cPanel/Hostinger, or create if localhost)
+        $pdo = null;
+        try {
+            $dsn = "mysql:host={$dbHost};port={$dbPort};dbname={$dbName};charset=utf8mb4";
+            $pdo = new PDO($dsn, $dbUser, $dbPass, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci"
+            ]);
+            $status[] = ['title' => 'MySQL डेटाबेस कनेक्शन', 'status' => 'success', 'msg' => "डेटाबेस `{$dbName}` से सफलतापूर्वक कनेक्ट हुआ।"];
+        } catch (PDOException $eDb) {
+            // If local XAMPP root connection, try create database
+            if ($dbHost === 'localhost' && $dbUser === 'root' && empty($dbPass)) {
+                try {
+                    $dsnNoDb = "mysql:host={$dbHost};port={$dbPort};charset=utf8mb4";
+                    $pdo = new PDO($dsnNoDb, $dbUser, $dbPass, [
+                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                        PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci"
+                    ]);
+                    $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+                    $pdo->exec("USE `{$dbName}`");
+                    $status[] = ['title' => 'डेटाबेस निर्माण एवं कनेक्शन', 'status' => 'success', 'msg' => "डेटाबेस `{$dbName}` तैयार किया गया और कनेक्ट हुआ।"];
+                } catch (Exception $eLocal) {
+                    throw new Exception("डेटाबेस कनेक्शन विफल: " . $eDb->getMessage());
+                }
+            } else {
+                throw new Exception("डेटाबेस कनेक्शन विफल: " . $eDb->getMessage() . "<br><small style='color:#FCA5A5;'>कृपया Hostinger hPanel ➔ Databases ➔ MySQL Databases में यूजर `{$dbUser}` और पासवर्ड चेक करें।</small>");
+            }
+        }
 
-        // Step 2: Create Database
-        $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-        $pdo->exec("USE `{$dbName}`");
-        $status[] = ['title' => 'डेटाबेस निर्माण', 'status' => 'success', 'msg' => "डेटाबेस `{$dbName}` तैयार है।"];
-
-        // Step 3: Read schema.sql and execute
+        // Step 2: Read schema.sql and execute
         $schemaFile = __DIR__ . '/schema.sql';
         if (!file_exists($schemaFile)) {
             throw new Exception("schema.sql फ़ाइल नहीं मिली!");
@@ -37,9 +69,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['auto'])) {
 
         $sql = file_get_contents($schemaFile);
         
-        // Execute SQL script
+        // Execute SQL script (tables, initial categories, pages, settings)
         $pdo->exec($sql);
-        $status[] = ['title' => 'तालिका एवं डेटा संरचना', 'status' => 'success', 'msg' => 'तालिकाएं (categories, news, pages, contacts, subscribers, manual_notifications) तैयार हो गईं।'];
+        $status[] = ['title' => 'तालिका एवं डेटा संरचना', 'status' => 'success', 'msg' => 'सभी आवश्यक तालिकाएं (categories, news, pages, contacts, subscribers, settings) तैयार हो गईं।'];
 
         // Step 4: Insert Comprehensive News Seeds if seeds.php exists
         if (file_exists(__DIR__ . '/seeds.php')) {
@@ -79,10 +111,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['auto'])) {
             }
         }
 
+        // Step 4.5: Ensure Default Admin Account Exists
+        $adminStmt = $pdo->prepare("
+            INSERT INTO `users` (`name`, `username`, `email`, `password`, `role`, `designation`, `location`, `status`)
+            VALUES ('मुख्य संपादक', 'admin', 'admin@news24hp.com', ?, 'admin', 'संपादकीय प्रमुख', 'शिमला, हिमाचल प्रदेश', 'active')
+            ON DUPLICATE KEY UPDATE `password` = VALUES(`password`), `role` = 'admin', `status` = 'active'
+        ");
+        $adminStmt->execute([password_hash('admin123', PASSWORD_BCRYPT)]);
+
         // Step 5: Verify Category Seeds
         $catCount = $pdo->query("SELECT COUNT(*) FROM categories")->fetchColumn();
         $newsCount = $pdo->query("SELECT COUNT(*) FROM news")->fetchColumn();
         $status[] = ['title' => 'हिंदी श्रेणियां एवं समाचार', 'status' => 'success', 'msg' => "कुल {$catCount} श्रेणियां/उप-श्रेणियां और {$newsCount} समाचार आर्टिकल्स (प्रत्येक श्रेणी और उप-श्रेणी में 5+ पोस्ट्स) सफलतापूर्वक सम्मिलित किए गए।"];
+
+        // Step 6: Ensure config/db.php exists on the server
+        $configDir = __DIR__ . '/config';
+        if (!is_dir($configDir)) {
+            @mkdir($configDir, 0755, true);
+        }
+        $configFile = $configDir . '/db.php';
+        if (!file_exists($configFile)) {
+            $configCode = "<?php\n"
+                . "if (!defined('APP_NAME')) define('APP_NAME', 'News 24 Himachal');\n"
+                . "define('APP_TAGLINE', 'हिमाचल प्रदेश का नंबर 1 हिंदी न्यूज़ पोर्टल');\n"
+                . "define('APP_EMAIL', 'editor@news24himachal.com');\n"
+                . "define('APP_PHONE', '+91 177 265 8900');\n"
+                . "define('APP_ADDRESS', 'प्रेस एवेन्यू, माल रोड, शिमला, हिमाचल प्रदेश - 171001');\n\n"
+                . "\$isLocalEnv = (isset(\$_SERVER['HTTP_HOST']) && (strpos(\$_SERVER['HTTP_HOST'], 'localhost') !== false || strpos(\$_SERVER['HTTP_HOST'], '127.0.0.1') !== false));\n\n"
+                . "if (\$isLocalEnv) {\n"
+                . "    define('APP_URL', 'http://localhost:8000');\n"
+                . "    define('DB_HOST', 'localhost');\n"
+                . "    define('DB_PORT', '3306');\n"
+                . "    define('DB_NAME', 'news_db');\n"
+                . "    define('DB_USER', 'root');\n"
+                . "    define('DB_PASS', '');\n"
+                . "} else {\n"
+                . "    define('APP_URL', 'https://news24hp.com');\n"
+                . "    define('DB_HOST', '{$dbHost}');\n"
+                . "    define('DB_PORT', '{$dbPort}');\n"
+                . "    define('DB_NAME', '{$dbName}');\n"
+                . "    define('DB_USER', '{$dbUser}');\n"
+                . "    define('DB_PASS', '{$dbPass}');\n"
+                . "}\n"
+                . "define('DB_CHARSET', 'utf8mb4');\n\n"
+                . "function getDBConnection() {\n"
+                . "    static \$pdo = null;\n"
+                . "    if (\$pdo === null) {\n"
+                . "        \$dsn = 'mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';dbname=' . DB_NAME . ';charset=' . DB_CHARSET;\n"
+                . "        \$pdo = new PDO(\$dsn, DB_USER, DB_PASS, [\n"
+                . "            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,\n"
+                . "            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,\n"
+                . "            PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci'\n"
+                . "        ]);\n"
+                . "    }\n"
+                . "    return \$pdo;\n"
+                . "}\n";
+            @file_put_contents($configFile, $configCode);
+            $status[] = ['title' => 'कॉन्फ़िगरेशन फ़ाइल', 'status' => 'success', 'msg' => 'config/db.php फ़ाइल स्वतः सुरक्षित रूप से तैयार कर दी गई।'];
+        }
 
         $installed = true;
 
@@ -252,27 +338,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['auto'])) {
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
                 <div class="form-group">
                     <label>MySQL Host</label>
-                    <input type="text" name="db_host" class="form-control" value="localhost" required>
+                    <input type="text" name="db_host" class="form-control" value="<?= htmlspecialchars($_POST['db_host'] ?? (defined('DB_HOST') ? DB_HOST : 'localhost')) ?>" required>
                 </div>
                 <div class="form-group">
                     <label>Port</label>
-                    <input type="text" name="db_port" class="form-control" value="3306" required>
+                    <input type="text" name="db_port" class="form-control" value="<?= htmlspecialchars($_POST['db_port'] ?? (defined('DB_PORT') ? DB_PORT : '3306')) ?>" required>
                 </div>
             </div>
 
             <div class="form-group">
                 <label>डेटाबेस नाम (Database Name)</label>
-                <input type="text" name="db_name" class="form-control" value="news_db" required>
+                <input type="text" name="db_name" class="form-control" value="<?= htmlspecialchars($_POST['db_name'] ?? (defined('DB_NAME') ? DB_NAME : 'news_db')) ?>" required>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                 <div class="form-group">
                     <label>Database Username</label>
-                    <input type="text" name="db_user" class="form-control" value="root" required>
+                    <input type="text" name="db_user" class="form-control" value="<?= htmlspecialchars($_POST['db_user'] ?? (defined('DB_USER') ? DB_USER : 'root')) ?>" required>
                 </div>
                 <div class="form-group">
                     <label>Database Password</label>
-                    <input type="password" name="db_pass" class="form-control" placeholder="खाली छोड़ें यदि कोई पासवर्ड नहीं है">
+                    <input type="password" name="db_pass" class="form-control" value="<?= htmlspecialchars($_POST['db_pass'] ?? (defined('DB_PASS') ? DB_PASS : '')) ?>" placeholder="डेटाबेस पासवर्ड दर्ज करें">
                 </div>
             </div>
 
