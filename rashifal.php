@@ -31,117 +31,12 @@ require_once __DIR__ . '/includes/header.php';
 ?>
 
 <style>
-/* Rich Modern Rashifal Hub Styles */
-.rashifal-hero {
-    background: linear-gradient(135deg, #101935 0%, #1E293B 100%);
-    color: #FFFFFF;
-    padding: 40px 0 30px;
-    border-bottom: 4px solid var(--primary);
-    position: relative;
-    overflow: hidden;
-}
-.rashifal-hero::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: radial-gradient(circle at 80% 20%, rgba(227, 27, 35, 0.15), transparent 60%);
-    pointer-events: none;
-}
-.rashifal-header-box {
-    text-align: center;
-    max-width: 850px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 2;
-}
-.rashifal-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(227, 27, 35, 0.2);
-    color: #FF6B6B;
-    border: 1px solid rgba(227, 27, 35, 0.4);
-    padding: 6px 16px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    margin-bottom: 12px;
-}
-.rashifal-title {
-    font-size: 2.2rem;
-    font-weight: 800;
-    margin-bottom: 8px;
-    color: #FFFFFF;
-    line-height: 1.25;
-}
-.rashifal-date-strip {
-    font-size: 1.05rem;
-    color: #E2E8F0;
-    margin-bottom: 20px;
-}
-
-/* 12 Rashi Interactive Navigation Grid */
-.rashi-nav-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 12px;
-    margin: 25px auto 0;
-    max-width: 1000px;
-}
-@media (max-width: 768px) {
-    .rashi-nav-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-    }
-    .rashifal-title {
-        font-size: 1.6rem;
-    }
-}
-@media (max-width: 480px) {
-    .rashi-nav-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-.rashi-nav-card {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 12px;
-    padding: 10px 8px;
-    text-align: center;
-    text-decoration: none;
-    color: #FFFFFF;
-    transition: all 0.25s ease;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-.rashi-nav-card:hover {
-    background: var(--primary);
-    border-color: var(--primary);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 16px rgba(227, 27, 35, 0.3);
-    color: #FFFFFF;
-}
-.rashi-nav-card .symbol {
-    font-size: 1.6rem;
-    line-height: 1;
-    margin-bottom: 4px;
-}
-.rashi-nav-card .name {
-    font-size: 0.92rem;
-    font-weight: 700;
-}
-.rashi-nav-card .eng {
-    font-size: 0.72rem;
-    color: #CBD5E1;
-}
-
-/* Rashi Cards Grid */
+/* Rich Modern Rashifal Aspect Card Styles */
 .rashi-cards-container {
     display: flex;
     flex-direction: column;
     gap: 30px;
-    margin-top: 30px;
+    margin-top: 20px;
 }
 .rashi-full-card {
     background: #FFFFFF;
@@ -357,37 +252,23 @@ require_once __DIR__ . '/includes/header.php';
 </style>
 
 <main>
-    <!-- Hero Banner -->
-    <section class="rashifal-hero">
+    <!-- Standard Clean Category Header -->
+    <section class="category-hero-header">
         <div class="container">
-            <div class="rashifal-header-box">
-                <span class="rashifal-badge">
-                    <i class="fas fa-sun"></i> आज का राशिफल एवं ज्योतिषीय गणना
-                </span>
-                <h1 class="rashifal-title">दैनिक राशिफल (Daily Horoscope)</h1>
-                <div class="rashifal-date-strip">
-                    <i class="fas fa-calendar-check" style="color: #F87171;"></i> <?= $formattedHindiDate ?> | सभी 12 राशियों का संपूर्ण भविष्यफल
-                </div>
-                <p style="font-size: 0.92rem; color: #CBD5E1; line-height: 1.5; margin-bottom: 0;">
-                    अपनी राशि चुनें और जानें आज आपका करियर, व्यापार, आर्थिक स्थिति, प्रेम संबंध, स्वास्थ्य एवं दिन को शुभ बनाने का अचूक ज्योतिषीय उपाय।
-                </p>
-
-                <!-- 12 Rashi Quick Jump Grid -->
-                <div class="rashi-nav-grid">
-                    <?php foreach ($rashifalList as $r): ?>
-                        <a href="#rashi-<?= $r['id'] ?>" class="rashi-nav-card">
-                            <span class="symbol"><?= $r['symbol'] ?></span>
-                            <span class="name"><?= $r['name'] ?></span>
-                            <span class="eng"><?= $r['english'] ?></span>
-                        </a>
-                    <?php endforeach; ?>
-                </div>
+            <div class="breadcrumbs" style="color: #A0AEC0;">
+                <a href="index.php" style="color: #CBD5E0;">होम</a>
+                <span class="separator">&gt;</span>
+                <span style="color: var(--white); font-weight: 600;">राशिफल</span>
             </div>
+            <h1 class="category-hero-title">राशिफल (दैनिक भविष्यफल)</h1>
+            <p style="color: #CBD5E0; font-size: 0.95rem;">
+                <?= $formattedHindiDate ?> • सभी 12 राशियों का आज का संपूर्ण भविष्यफल
+            </p>
         </div>
     </section>
 
     <!-- Main Content & Aspect Cards -->
-    <div class="main-layout" style="padding: 30px 0 60px;">
+    <div class="main-layout" style="padding: 15px 0 60px;">
         <div class="container content-grid">
             
             <!-- Left Column: 12 Rashi Detail Cards -->
