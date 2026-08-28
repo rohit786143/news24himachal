@@ -101,6 +101,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $excerpt = mb_substr($plainText, 0, 160, 'UTF-8') . '...';
         }
 
+        // Ensure author_id column exists in news table safely
+        try {
+            $colCheck = $pdo->query("SHOW COLUMNS FROM `news` LIKE 'author_id'")->fetch();
+            if (!$colCheck) {
+                $pdo->exec("ALTER TABLE `news` ADD COLUMN `author_id` INT NULL AFTER `author`");
+            }
+        } catch (Exception $eCol) {}
+
         try {
             if ($isEdit) {
                 // Update
@@ -140,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $_SESSION['flash_message'] = "खबर सफलतापूर्वक अपडेट कर दी गई है!";
                 $_SESSION['flash_type'] = "success";
-                header("Location: /admin/posts.php");
+                header("Location: posts.php");
                 exit;
             } else {
                 // Insert New
@@ -177,7 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $newId = $pdo->lastInsertId();
                 $_SESSION['flash_message'] = "नई खबर (ID: #{$newId}) सफलतापूर्वक प्रकाशित कर दी गई है!";
                 $_SESSION['flash_type'] = "success";
-                header("Location: /admin/posts.php");
+                header("Location: posts.php");
                 exit;
             }
         } catch (PDOException $e) {
@@ -443,7 +451,28 @@ require_once __DIR__ . '/includes/header.php';
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
 
 <script>
-// Full Rich Toolbar Options including Justify, Bold, Italic, H1-H6, Font Sizes, Colors, Lists, Media
+// Custom Image Upload Handler for Quill (Local File Picker)
+function imageHandler() {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.click();
+
+    input.onchange = function() {
+        const file = input.files[0];
+        if (file && /^image\//.test(file.type)) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const range = quill.getSelection(true);
+                quill.insertEmbed(range.index, 'image', e.target.result);
+                quill.setSelection(range.index + 1);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+}
+
+// Full Rich Toolbar with All Requested Options (Bold, Align, H1-H6, Font Sizes, Colors, Lists, Media, Image Upload)
 const toolbarOptions = [
     [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
     [{ 'size': ['small', false, 'large', 'huge'] }],
@@ -451,6 +480,7 @@ const toolbarOptions = [
     [{ 'color': [] }, { 'background': [] }],
     [{ 'align': '' }, { 'align': 'center' }, { 'align': 'right' }, { 'align': 'justify' }],
     [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    [{ 'script': 'sub'}, { 'script': 'super' }],
     [{ 'indent': '-1'}, { 'indent': '+1' }],
     ['blockquote', 'code-block'],
     ['link', 'image', 'video'],
@@ -459,10 +489,15 @@ const toolbarOptions = [
 
 const quill = new Quill('#quillEditor', {
     modules: {
-        toolbar: toolbarOptions
+        toolbar: {
+            container: toolbarOptions,
+            handlers: {
+                'image': imageHandler
+            }
+        }
     },
     theme: 'snow',
-    placeholder: 'खबर का पूरा विवरण यहाँ लिखें या पेस्ट करें (Bold, Italic, Justify, H1-H6, लिस्ट, कलर, इमेज आदि)...'
+    placeholder: 'खबर का पूरा विवरण यहाँ लिखें या पेस्ट करें (Bold, Italic, Align Justify, H1-H6, लिस्ट, कलर, इमेज आदि)...'
 });
 
 // Sync Quill HTML to hidden input before form submit
@@ -476,9 +511,10 @@ form.onsubmit = function() {
 function filterSubcategories() {
     const parentSelect = document.getElementById('categorySelect');
     const subSelect = document.getElementById('subcategorySelect');
+    if (!parentSelect || !subSelect) return;
+
     const selectedParentId = parentSelect.value;
     const currentSubValue = subSelect.value;
-
     let hasVisibleMatch = false;
 
     for (let i = 0; i < subSelect.options.length; i++) {
@@ -504,6 +540,8 @@ function filterSubcategories() {
     if (!hasVisibleMatch && subSelect.value !== '') {
         subSelect.value = '';
     }
+}
+
 // Local Image File Preview Handler
 function previewNewsImage(input) {
     const img = document.getElementById('imagePreview');
@@ -538,7 +576,7 @@ function updateImagePreview(url) {
 }
 
 // Run initial subcategory filter on page load
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
     filterSubcategories();
 });
 </script>
