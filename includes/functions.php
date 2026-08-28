@@ -429,34 +429,41 @@ function getRecentNews($pdo, $limit = 5) {
 }
 
 /**
- * Get Article by Slug or ID (Ultra-Resilient)
+ * Get Full Article by Slug or ID
  */
 function getArticleBySlug($pdo, $slug) {
-    if (!$pdo || empty($slug)) return null;
-    $slug = trim((string)$slug);
+    if (empty($slug)) return null;
+
+    // Ensure legacy articles are linked to Chief Admin
+    syncLegacyAuthorPosts($pdo);
+    $defaultAvatar = getAdminAvatar($pdo);
 
     try {
-        // 1. Primary Attempt by Slug with Safe LEFT JOINs
         $stmt = $pdo->prepare("
             SELECT n.*, 
                    COALESCE(c.name, 'ताज़ा खबर') AS category_name, 
                    COALESCE(c.slug, 'himachal') AS category_slug, 
                    sub.name AS subcategory_name, sub.slug AS subcategory_slug,
                    u.id AS editor_id, 
-                   COALESCE(u.name, n.author, 'न्यूज़ डेस्क') AS editor_name, 
-                   u.avatar AS editor_avatar,
-                   u.designation AS editor_designation, 
+                   COALESCE(u.name, n.author, 'Sudhir Dutt Sharma') AS editor_name, 
+                   COALESCE(NULLIF(u.avatar, ''), ?) AS editor_avatar,
+                   COALESCE(u.designation, 'Chief Editor • News 24 Himachal') AS editor_designation, 
                    u.bio AS editor_bio,
                    u.location AS editor_location, 
                    u.username AS editor_username
             FROM news n
             LEFT JOIN categories c ON n.category_id = c.id
             LEFT JOIN categories sub ON n.subcategory_id = sub.id
-            LEFT JOIN users u ON (u.name = n.author OR u.username = n.author)
+            LEFT JOIN users u ON (
+                (n.author_id IS NOT NULL AND n.author_id > 0 AND n.author_id = u.id)
+                OR (LOWER(u.name) = LOWER(n.author) OR LOWER(u.username) = LOWER(n.author))
+                OR (u.role = 'admin')
+            )
             WHERE n.slug = ?
+            ORDER BY (n.author_id = u.id) DESC, (u.role = 'admin') DESC
             LIMIT 1
         ");
-        $stmt->execute([$slug]);
+        $stmt->execute([$defaultAvatar, $slug]);
         $res = $stmt->fetch();
         if ($res) return $res;
 
@@ -468,20 +475,25 @@ function getArticleBySlug($pdo, $slug) {
                        COALESCE(c.slug, 'himachal') AS category_slug, 
                        sub.name AS subcategory_name, sub.slug AS subcategory_slug,
                        u.id AS editor_id, 
-                       COALESCE(u.name, n.author, 'न्यूज़ डेस्क') AS editor_name, 
-                       u.avatar AS editor_avatar,
-                       u.designation AS editor_designation, 
+                       COALESCE(u.name, n.author, 'Sudhir Dutt Sharma') AS editor_name, 
+                       COALESCE(NULLIF(u.avatar, ''), ?) AS editor_avatar,
+                       COALESCE(u.designation, 'Chief Editor • News 24 Himachal') AS editor_designation, 
                        u.bio AS editor_bio,
                        u.location AS editor_location, 
                        u.username AS editor_username
                 FROM news n
                 LEFT JOIN categories c ON n.category_id = c.id
                 LEFT JOIN categories sub ON n.subcategory_id = sub.id
-                LEFT JOIN users u ON (u.name = n.author OR u.username = n.author)
+                LEFT JOIN users u ON (
+                    (n.author_id IS NOT NULL AND n.author_id > 0 AND n.author_id = u.id)
+                    OR (LOWER(u.name) = LOWER(n.author) OR LOWER(u.username) = LOWER(n.author))
+                    OR (u.role = 'admin')
+                )
                 WHERE n.id = ?
+                ORDER BY (n.author_id = u.id) DESC, (u.role = 'admin') DESC
                 LIMIT 1
             ");
-            $stmtId->execute([(int)$slug]);
+            $stmtId->execute([$defaultAvatar, (int)$slug]);
             $resId = $stmtId->fetch();
             if ($resId) return $resId;
         }
@@ -495,9 +507,9 @@ function getArticleBySlug($pdo, $slug) {
             $rawArt['category_slug'] = 'himachal';
             $rawArt['subcategory_name'] = null;
             $rawArt['subcategory_slug'] = null;
-            $rawArt['editor_name'] = $rawArt['author'] ?? 'न्यूज़ डेस्क';
-            $rawArt['editor_avatar'] = 'assets/images/author_placeholder.jpg';
-            $rawArt['editor_designation'] = 'संवाददाता';
+            $rawArt['editor_name'] = $rawArt['author'] ?? 'Sudhir Dutt Sharma';
+            $rawArt['editor_avatar'] = $defaultAvatar;
+            $rawArt['editor_designation'] = 'Chief Editor';
             return $rawArt;
         }
 
@@ -513,9 +525,9 @@ function getArticleBySlug($pdo, $slug) {
                 $art['category_slug'] = 'himachal';
                 $art['subcategory_name'] = null;
                 $art['subcategory_slug'] = null;
-                $art['editor_name'] = $art['author'] ?? 'न्यूज़ डेस्क';
-                $art['editor_avatar'] = 'assets/images/author_placeholder.jpg';
-                $art['editor_designation'] = 'संवाददाता';
+                $art['editor_name'] = $art['author'] ?? 'Sudhir Dutt Sharma';
+                $art['editor_avatar'] = $defaultAvatar;
+                $art['editor_designation'] = 'Chief Editor';
                 return $art;
             }
         } catch (Exception $e2) {}
@@ -535,24 +547,31 @@ function getAuthorProfile($pdo, $idOrUsername) {
             $stmt = $pdo->prepare("SELECT * FROM `users` WHERE `username` = ? AND `status` = 'active' LIMIT 1");
             $stmt->execute([$idOrUsername]);
         }
-        return $stmt->fetch();
+        $author = $stmt->fetch();
+        if (!$author) {
+            // Fallback to Chief Admin User
+            $stmtAdmin = $pdo->query("SELECT * FROM `users` WHERE `role` = 'admin' AND `status` = 'active' ORDER BY `id` ASC LIMIT 1");
+            $author = $stmtAdmin->fetch();
+        }
+        return $author;
     } catch (PDOException $e) {
         return null;
     }
 }
 
 /**
- * Get Articles by Author ID (with pagination)
+ * Get Articles by Author ID (with pagination & legacy fallback)
  */
 function getNewsByAuthorId($pdo, $authorId, $limit = 9, $offset = 0) {
     try {
+        syncLegacyAuthorPosts($pdo);
         $stmt = $pdo->prepare("
             SELECT n.*, c.name AS category_name, c.slug AS category_slug,
                    sub.name AS subcategory_name, sub.slug AS subcategory_slug
             FROM news n
             JOIN categories c ON n.category_id = c.id
             LEFT JOIN categories sub ON n.subcategory_id = sub.id
-            WHERE n.author_id = ?
+            WHERE n.author_id = ? OR (n.author_id IS NULL OR n.author_id = 0)
             ORDER BY n.created_at DESC
             LIMIT " . (int)$limit . " OFFSET " . (int)$offset
         );

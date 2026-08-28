@@ -82,9 +82,9 @@ require_once __DIR__ . '/includes/header.php';
                 <!-- Meta Information Bar -->
                 <?php
                 $authorId = (int)($article['author_id'] ?? ($article['editor_id'] ?? 1));
-                $authorAvatar = !empty($article['editor_avatar']) ? $article['editor_avatar'] : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80';
-                $authorName = !empty($article['editor_name']) ? $article['editor_name'] : ($article['author'] ?? 'केलांग संवाददाता');
-                $authorDesignation = !empty($article['editor_designation']) ? $article['editor_designation'] : 'संपादकीय डेस्क • News 24 Himachal';
+                $authorAvatar = !empty($article['editor_avatar']) ? $article['editor_avatar'] : getAdminAvatar($pdo);
+                $authorName = !empty($article['editor_name']) ? $article['editor_name'] : ($article['author'] ?? 'Sudhir Dutt Sharma');
+                $authorDesignation = !empty($article['editor_designation']) ? $article['editor_designation'] : 'Chief Editor • News 24 Himachal';
                 ?>
                 <div class="article-meta-bar">
                     <a href="author.php?id=<?= $authorId ?>" class="meta-author-link" style="text-decoration: none; color: inherit; display: inline-flex;" title="<?= sanitize($authorName) ?> की प्रोफाइल एवं खबरें देखें">

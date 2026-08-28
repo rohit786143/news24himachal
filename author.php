@@ -63,7 +63,7 @@ require_once __DIR__ . '/includes/header.php';
                 
                 <!-- Avatar -->
                 <div style="position: relative; flex-shrink: 0;">
-                    <img src="<?= sanitize($author['avatar'] ?: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80') ?>" 
+                    <img src="<?= sanitize(!empty($author['avatar']) ? $author['avatar'] : getAdminAvatar($pdo)) ?>" 
                          alt="<?= sanitize($author['name']) ?>" 
                          style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary-red); box-shadow: 0 8px 24px rgba(229, 9, 20, 0.4);">
                     <span style="position: absolute; bottom: 4px; right: 4px; background: #10B981; width: 18px; height: 18px; border-radius: 50%; border: 3px solid #18181B;" title="Active Reporter"></span>
