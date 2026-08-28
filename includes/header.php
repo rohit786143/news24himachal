@@ -11,6 +11,28 @@ $pageDescription = $pageDescription ?? 'News 24 Himachal - ब्रेकिं
 
 // Track unique visitor & pageview
 trackSiteVisitor($pdo, $pageTitle);
+
+// Protocol & Host Helper for Absolute Image URLs (Required for WhatsApp link previews)
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || ($_SERVER['SERVER_PORT'] ?? 80) == 443) ? "https://" : "http://";
+$host = $_SERVER['HTTP_HOST'] ?? 'news24hp.com';
+if (strpos($protocol, 'http://') === 0 && strpos($host, 'localhost') === false && strpos($host, '127.0.0.1') === false) {
+    $protocol = 'https://';
+}
+$baseUrl = $protocol . $host;
+$currentCanonicalUrl = $protocol . $host . ($_SERVER['REQUEST_URI'] ?? '');
+
+$ogType = $ogType ?? 'website';
+$ogUrl = $ogUrl ?? $currentCanonicalUrl;
+$ogSiteName = $ogSiteName ?? 'News 24 Himachal';
+
+// Ensure Absolute Image URL for WhatsApp / Social Preview
+if (empty($ogImage)) {
+    $ogImage = $baseUrl . '/assets/images/logo-og.png';
+} else {
+    if (strpos($ogImage, 'http://') !== 0 && strpos($ogImage, 'https://') !== 0) {
+        $ogImage = $baseUrl . '/' . ltrim($ogImage, '/');
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="hi">
@@ -20,11 +42,28 @@ trackSiteVisitor($pdo, $pageTitle);
     <title><?= sanitize($pageTitle) ?></title>
     <meta name="description" content="<?= sanitize($pageDescription) ?>">
     
-    <!-- Open Graph / Meta -->
-    <meta property="og:type" content="news">
+    <!-- Canonical URL -->
+    <link rel="canonical" href="<?= htmlspecialchars($ogUrl) ?>">
+
+    <!-- Open Graph / WhatsApp / Facebook Meta Tags -->
+    <meta property="og:type" content="<?= htmlspecialchars($ogType) ?>">
+    <meta property="og:site_name" content="<?= sanitize($ogSiteName) ?>">
+    <meta property="og:url" content="<?= htmlspecialchars($ogUrl) ?>">
     <meta property="og:title" content="<?= sanitize($pageTitle) ?>">
     <meta property="og:description" content="<?= sanitize($pageDescription) ?>">
-    <meta property="og:site_name" content="News 24 Himachal">
+    <meta property="og:image" content="<?= htmlspecialchars($ogImage) ?>">
+    <meta property="og:image:secure_url" content="<?= htmlspecialchars($ogImage) ?>">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="<?= sanitize($pageTitle) ?>">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="<?= htmlspecialchars($ogUrl) ?>">
+    <meta name="twitter:title" content="<?= sanitize($pageTitle) ?>">
+    <meta name="twitter:description" content="<?= sanitize($pageDescription) ?>">
+    <meta name="twitter:image" content="<?= htmlspecialchars($ogImage) ?>">
     
     <!-- Google Fonts: Hind (Devanagari) & Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

@@ -34,10 +34,15 @@ incrementArticleViews($pdo, $article['id']);
 $relatedArticles = getRelatedNews($pdo, $article['category_id'], $article['id'], 3);
 
 $pageTitle = sanitize($article['title']) . ' - News 24 Himachal';
-$pageDescription = sanitize($article['excerpt'] ?? mb_substr(strip_tags($article['content']), 0, 150) . '...');
+$pageDescription = sanitize($article['excerpt'] ?? mb_substr(strip_tags($article['content']), 0, 160) . '...');
 $readingTime = estimateReadingTime($article['content']);
 
+// Set Dynamic Open Graph (OG) Meta Variables for WhatsApp & Social Sharing
+$ogImage = $article['image_url'] ?? '';
+$ogType = 'article';
+
 $currentUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+$ogUrl = $currentUrl;
 $encodedUrl = urlencode($currentUrl);
 $encodedTitle = urlencode($article['title']);
 
