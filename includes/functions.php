@@ -765,18 +765,38 @@ function setSetting($pdo, $key, $value) {
 }
 
 /**
- * Generate clean URL slug from string (supports Hindi transliteration / clean format)
+ * Generate clean URL slug from string (supports Hindi to English Roman transliteration)
  */
 function slugify($text) {
-    // Replace non letter or digits by -
-    $text = preg_replace('~[^\pL\d]+~u', '-', $text);
-    // Trim
-    $text = trim($text, '-');
-    // Transliterate if possible
     if (empty($text)) {
         return 'post-' . time();
     }
-    return mb_strtolower($text, 'UTF-8');
+
+    $devanagariMap = [
+        'क'=>'k', 'ख'=>'kh', 'ग'=>'g', 'घ'=>'gh', 'ङ'=>'n',
+        'च'=>'ch', 'छ'=>'chh', 'ज'=>'j', 'झ'=>'jh', 'ञ'=>'n',
+        'ट'=>'t', 'ठ'=>'th', 'ड'=>'d', 'ढ'=>'dh', 'ण'=>'n',
+        'त'=>'t', 'थ'=>'th', 'द'=>'d', 'ध'=>'dh', 'न'=>'n',
+        'प'=>'p', 'फ'=>'ph', 'ब'=>'b', 'भ'=>'bh', 'म'=>'m',
+        'य'=>'y', 'र'=>'r', 'ल'=>'l', 'व'=>'v', 'श'=>'sh', 'ष'=>'sh', 'स'=>'s', 'ह'=>'h',
+        'क्ष'=>'ksh', 'त्र'=>'tr', 'ज्ञ'=>'gy', 'ड़'=>'d', 'ढ़'=>'dh', 'फ़'=>'f', 'ज़'=>'z',
+        'अ'=>'a', 'आ'=>'aa', 'इ'=>'i', 'ई'=>'ee', 'उ'=>'u', 'ऊ'=>'oo', 'ए'=>'e', 'ऐ'=>'ai', 'ओ'=>'o', 'औ'=>'au',
+        'ा'=>'a', 'ि'=>'i', 'ी'=>'ee', 'ु'=>'u', 'ू'=>'oo', 'े'=>'e', 'ै'=>'ai', 'ो'=>'o', 'ौ'=>'au',
+        'ं'=>'n', 'ँ'=>'n', 'ः'=>'h', 'ृ'=>'ri', '्'=>'', '़'=>''
+    ];
+
+    $text = strtr($text, $devanagariMap);
+    $text = strtolower($text);
+    $text = preg_replace('/[^a-z0-9\s-]/', '', $text);
+    $text = preg_replace('/\s+/', '-', $text);
+    $text = preg_replace('/-+/', '-', $text);
+    $text = trim($text, '-');
+
+    if (empty($text)) {
+        return 'post-' . time();
+    }
+
+    return $text;
 }
 
 /**

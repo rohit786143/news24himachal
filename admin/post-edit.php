@@ -209,201 +209,183 @@ require_once __DIR__ . '/includes/header.php';
 <?php endif; ?>
 
 <form method="POST" action="" id="postForm" enctype="multipart/form-data">
-    <div style="display: grid; grid-template-columns: 2.2fr 1        <!-- Left Column: Main Article Body & Details -->
-        <div>
-            <div class="panel">
-                <div class="panel-header">
-                    <h2 class="panel-title"><i class="fas fa-newspaper"></i> Article Details</h2>
+    <div style="display: flex; flex-direction: column; gap: 24px; max-width: 960px; margin: 0 auto;">
+        
+        <!-- 1. Main Article Body & Details Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title"><i class="fas fa-newspaper"></i> Article Details</h2>
+            </div>
+            <div class="panel-body">
+                
+                <!-- Title -->
+                <div class="form-group">
+                    <label class="form-label" for="postTitle">
+                        Headline / Title <span class="required">*</span>
+                    </label>
+                    <input type="text" id="postTitle" name="title" class="form-control" style="font-size: 1.05rem; font-weight: 600;" 
+                           placeholder="e.g. State Cabinet Decision: New Employment Policy Announced..." 
+                           value="<?= sanitize($post['title'] ?? ($_POST['title'] ?? '')) ?>" required>
                 </div>
-                <div class="panel-body">
-                    
-                    <!-- Title -->
-                    <div class="form-group">
-                        <label class="form-label" for="postTitle">
-                            Headline / Title <span class="required">*</span>
-                        </label>
-                        <input type="text" id="postTitle" name="title" class="form-control" style="font-size: 1.05rem; font-weight: 600;" 
-                               placeholder="e.g. State Cabinet Decision: New Employment Policy Announced..." 
-                               value="<?= sanitize($post['title'] ?? ($_POST['title'] ?? '')) ?>" required>
-                    </div>
 
-                    <!-- Slug -->
-                    <div class="form-group">
-                        <label class="form-label" for="postSlug">
-                            Permalink Slug <span class="form-hint">(Auto-generated from title if left empty)</span>
-                        </label>
-                        <div style="display: flex; gap: 8px;">
-                            <input type="text" id="postSlug" name="slug" class="form-control" 
-                                   placeholder="himachal-cabinet-decision-employment-policy" 
-                                   value="<?= sanitize($post['slug'] ?? ($_POST['slug'] ?? '')) ?>">
-                            <button type="button" class="topbar-btn topbar-btn-secondary" onclick="document.getElementById('postSlug').value = generateSlug(document.getElementById('postTitle').value);" title="Generate slug from title">
-                                <i class="fas fa-wand-magic-sparkles"></i>
-                            </button>
+                <!-- Slug -->
+                <div class="form-group">
+                    <label class="form-label" for="postSlug">
+                        Permalink Slug <span class="form-hint">(Auto-generated from title in English if left empty)</span>
+                    </label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="postSlug" name="slug" class="form-control" 
+                               placeholder="himachal-cabinet-decision-employment-policy" 
+                               value="<?= sanitize($post['slug'] ?? ($_POST['slug'] ?? '')) ?>">
+                        <button type="button" class="topbar-btn topbar-btn-secondary" onclick="document.getElementById('postSlug').value = generateSlug(document.getElementById('postTitle').value);" title="Generate English slug from title">
+                            <i class="fas fa-wand-magic-sparkles"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Excerpt -->
+                <div class="form-group">
+                    <label class="form-label" for="postExcerpt">
+                        Short Excerpt <span class="form-hint">(For homepage & social cards)</span>
+                    </label>
+                    <textarea id="postExcerpt" name="excerpt" class="form-control" style="min-height: 70px;" 
+                              placeholder="Summary of the news in 1-2 sentences..."><?= sanitize($post['excerpt'] ?? ($_POST['excerpt'] ?? '')) ?></textarea>
+                </div>
+
+                <!-- Full Content with WYSIWYG Editor -->
+                <div class="form-group">
+                    <label class="form-label">
+                        Full Article Content <span class="required">*</span>
+                    </label>
+                    <div class="quill-wrapper">
+                        <div id="quillEditor" style="min-height: 380px;">
+                            <?= $post['content'] ?? ($_POST['content'] ?? '') ?>
                         </div>
                     </div>
+                    <input type="hidden" name="content" id="hiddenContent">
+                </div>
 
-                    <!-- Excerpt -->
-                    <div class="form-group">
-                        <label class="form-label" for="postExcerpt">
-                            Short Excerpt <span class="form-hint">(For homepage & social cards)</span>
-                        </label>
-                        <textarea id="postExcerpt" name="excerpt" class="form-control" style="min-height: 70px;" 
-                                  placeholder="Summary of the news in 1-2 sentences..."><?= sanitize($post['excerpt'] ?? ($_POST['excerpt'] ?? '')) ?></textarea>
-                    </div>
+            </div>
+        </div>
 
-                    <!-- Full Content with WYSIWYG Editor -->
-                    <div class="form-group">
-                        <label class="form-label">
-                            Full Article Content <span class="required">*</span>
-                        </label>
-                        <div class="quill-wrapper">
-                            <div id="quillEditor" style="min-height: 380px;">
-                                <?= $post['content'] ?? ($_POST['content'] ?? '') ?>
-                            </div>
-                        </div>
-                        <input type="hidden" name="content" id="hiddenContent">
-                    </div>
+        <!-- 2. Categories Selection Box -->
+        <div class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title"><i class="fas fa-folder-tree"></i> Categories</h2>
+            </div>
+            <div class="panel-body">
+                
+                <!-- Parent Category -->
+                <div class="form-group">
+                    <label class="form-label" for="categorySelect">
+                        Parent Category <span class="required">*</span>
+                    </label>
+                    <select name="category_id" id="categorySelect" class="form-control" required onchange="filterSubcategories()">
+                        <option value="">-- Select Category --</option>
+                        <?php foreach ($parents as $p): ?>
+                            <option value="<?= $p['id'] ?>" <?= (($post['category_id'] ?? ($_POST['category_id'] ?? 0)) == $p['id']) ? 'selected' : '' ?>>
+                                📁 <?= sanitize($p['name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
 
+                <!-- Subcategory (Cascading Filter) -->
+                <div class="form-group">
+                    <label class="form-label" for="subcategorySelect">
+                        Subcategory / District
+                    </label>
+                    <select name="subcategory_id" id="subcategorySelect" class="form-control">
+                        <option value="">-- None --</option>
+                        <?php foreach ($allSubcategories as $sub): ?>
+                            <option value="<?= $sub['id'] ?>" data-parent="<?= $sub['parent_id'] ?>" 
+                                    <?= (($post['subcategory_id'] ?? ($_POST['subcategory_id'] ?? 0)) == $sub['id']) ? 'selected' : '' ?>>
+                                ↳ <?= sanitize($sub['name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <span class="form-hint">Subcategories filter automatically when parent category changes.</span>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 3. Featured Image Box -->
+        <div class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title"><i class="fas fa-image"></i> Featured Image</h2>
+            </div>
+            <div class="panel-body">
+                
+                <!-- Direct Device File Upload Input -->
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label class="form-label" for="newsImageFile" style="color: #FFFFFF; font-weight: 700;">
+                        <i class="fas fa-cloud-arrow-up" style="color: var(--primary);"></i> Upload Image from Device
+                    </label>
+                    <input type="file" id="newsImageFile" name="image_file" accept="image/*" class="form-control" 
+                           style="padding: 8px 12px; cursor: pointer; border: 1.5px dashed var(--primary); background: rgba(229,9,20,0.05);"
+                           onchange="previewNewsImage(this)">
+                    <span class="form-hint" style="color: var(--text-dim);">Select JPG, PNG, or WEBP image file from device.</span>
+                </div>
+
+                <div class="form-group" style="border-top: 1px dashed var(--border-color); padding-top: 12px; margin-bottom: 12px;">
+                    <label class="form-label" for="imageUrlInput">
+                        Or Image URL
+                    </label>
+                    <input type="url" id="imageUrlInput" name="image_url" class="form-control" 
+                           placeholder="https://images.unsplash.com/..." 
+                           value="<?= sanitize($post['image_url'] ?? ($_POST['image_url'] ?? '')) ?>" 
+                           oninput="updateImagePreview(this.value)">
+                </div>
+
+                <!-- Live Image Preview -->
+                <div style="margin-top: 10px; border-radius: var(--radius-sm); overflow: hidden; border: 1px dashed var(--border-color); background: var(--bg-input); height: 160px; display: flex; align-items: center; justify-content: center;">
+                    <img id="imagePreview" src="<?= sanitize($post['image_url'] ?? '') ?>" alt="Preview" 
+                         style="max-width: 100%; max-height: 100%; object-fit: cover; <?= empty($post['image_url']) ? 'display:none;' : '' ?>">
+                    <span id="imagePlaceholderText" style="color: var(--text-dim); font-size: 0.8rem; <?= !empty($post['image_url']) ? 'display:none;' : '' ?>">
+                        <i class="far fa-image" style="font-size: 1.5rem; display: block; margin-bottom: 4px; text-align: center;"></i>
+                        Image preview will appear here
+                    </span>
                 </div>
             </div>
         </div>
 
-        <!-- Right Column: Category, Subcategory, Image, Flags & Save -->
-        <div>
-            
-            <!-- Publish / Save Action Box -->
-            <div class="panel">
-                <div class="panel-header">
-                    <h2 class="panel-title"><i class="fas fa-paper-plane"></i> Publish</h2>
-                </div>
-                <div class="panel-body">
-                    <button type="submit" class="topbar-btn" style="width: 100%; justify-content: center; padding: 12px; font-size: 1rem;">
-                        <i class="fas fa-check-circle"></i> <?= $isEdit ? 'Save Changes' : 'Publish Article' ?>
-                    </button>
-
-                    <div style="margin-top: 14px; text-align: center;">
-                        <a href="/admin/posts.php" style="color: var(--text-dim); font-size: 0.85rem; text-decoration: none;">
-                            <i class="fas fa-arrow-left"></i> Back to Posts List
-                        </a>
-                    </div>
-                </div>
+        <!-- 4. Display Badges & Priority Settings Box -->
+        <div class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title"><i class="fas fa-tags"></i> Priority & Settings</h2>
             </div>
-
-            <!-- Categories Selection Box -->
-            <div class="panel">
-                <div class="panel-header">
-                    <h2 class="panel-title"><i class="fas fa-folder-tree"></i> Categories</h2>
-                </div>
-                <div class="panel-body">
-                    
-                    <!-- Parent Category -->
-                    <div class="form-group">
-                        <label class="form-label" for="categorySelect">
-                            Parent Category <span class="required">*</span>
-                        </label>
-                        <select name="category_id" id="categorySelect" class="form-control" required onchange="filterSubcategories()">
-                            <option value="">-- Select Category --</option>
-                            <?php foreach ($parents as $p): ?>
-                                <option value="<?= $p['id'] ?>" <?= (($post['category_id'] ?? ($_POST['category_id'] ?? 0)) == $p['id']) ? 'selected' : '' ?>>
-                                    📁 <?= sanitize($p['name']) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-
-                    <!-- Subcategory (Cascading Filter) -->
-                    <div class="form-group">
-                        <label class="form-label" for="subcategorySelect">
-                            Subcategory / District
-                        </label>
-                        <select name="subcategory_id" id="subcategorySelect" class="form-control">
-                            <option value="">-- None --</option>
-                            <?php foreach ($allSubcategories as $sub): ?>
-                                <option value="<?= $sub['id'] ?>" data-parent="<?= $sub['parent_id'] ?>" 
-                                        <?= (($post['subcategory_id'] ?? ($_POST['subcategory_id'] ?? 0)) == $sub['id']) ? 'selected' : '' ?>>
-                                    ↳ <?= sanitize($sub['name']) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                        <span class="form-hint">Subcategories filter automatically when parent category changes.</span>
-                    </div>
-
-                </div>
-            </div>
-
-            <!-- Featured Image Box -->
-            <div class="panel">
-                <div class="panel-header">
-                    <h2 class="panel-title"><i class="fas fa-image"></i> Featured Image</h2>
-                </div>
-                <div class="panel-body">
-                    
-                    <!-- Direct Device File Upload Input -->
-                    <div class="form-group" style="margin-bottom: 14px;">
-                        <label class="form-label" for="newsImageFile" style="color: #FFFFFF; font-weight: 700;">
-                            <i class="fas fa-cloud-arrow-up" style="color: var(--primary);"></i> Upload Image from Device
-                        </label>
-                        <input type="file" id="newsImageFile" name="image_file" accept="image/*" class="form-control" 
-                               style="padding: 8px 12px; cursor: pointer; border: 1.5px dashed var(--primary); background: rgba(229,9,20,0.05);"
-                               onchange="previewNewsImage(this)">
-                        <span class="form-hint" style="color: var(--text-dim);">Select JPG, PNG, or WEBP image file from device.</span>
-                    </div>
-
-                    <div class="form-group" style="border-top: 1px dashed var(--border-color); padding-top: 12px; margin-bottom: 12px;">
-                        <label class="form-label" for="imageUrlInput">
-                            Or Image URL
-                        </label>
-                        <input type="url" id="imageUrlInput" name="image_url" class="form-control" 
-                               placeholder="https://images.unsplash.com/..." 
-                               value="<?= sanitize($post['image_url'] ?? ($_POST['image_url'] ?? '')) ?>" 
-                               oninput="updateImagePreview(this.value)">
-                    </div>
-
-                    <!-- Live Image Preview -->
-                    <div style="margin-top: 10px; border-radius: var(--radius-sm); overflow: hidden; border: 1px dashed var(--border-color); background: var(--bg-input); height: 160px; display: flex; align-items: center; justify-content: center;">
-                        <img id="imagePreview" src="<?= sanitize($post['image_url'] ?? '') ?>" alt="Preview" 
-                             style="max-width: 100%; max-height: 100%; object-fit: cover; <?= empty($post['image_url']) ? 'display:none;' : '' ?>">
-                        <span id="imagePlaceholderText" style="color: var(--text-dim); font-size: 0.8rem; <?= !empty($post['image_url']) ? 'display:none;' : '' ?>">
-                            <i class="far fa-image" style="font-size: 1.5rem; display: block; margin-bottom: 4px; text-align: center;"></i>
-                            Image preview will appear here
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Display Badges & Meta -->
-            <div class="panel">
-                <div class="panel-header">
-                    <h2 class="panel-title"><i class="fas fa-tags"></i> Priority & Settings</h2>
-                </div>
-                <div class="panel-body" style="display: flex; flex-direction: column; gap: 12px;">
-                    
-                    <label class="form-check">
+            <div class="panel-body" style="display: flex; flex-direction: column; gap: 14px;">
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
+                    <label class="form-check" style="background: var(--bg-body); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px;">
                         <input type="checkbox" name="is_breaking" value="1" <?= (!empty($post['is_breaking']) || !empty($_POST['is_breaking'])) ? 'checked' : '' ?>>
                         <div>
-                            <strong style="color: #fff; font-size: 0.88rem;"><i class="fas fa-bolt" style="color: var(--primary);"></i> Breaking News</strong>
-                            <div style="font-size: 0.75rem; color: var(--text-dim);">Flashes in top ticker</div>
+                            <strong style="color: var(--text-heading); font-size: 0.88rem;"><i class="fas fa-bolt" style="color: var(--primary);"></i> Breaking News</strong>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Flashes in top ticker</div>
                         </div>
                     </label>
 
-                    <label class="form-check">
+                    <label class="form-check" style="background: var(--bg-body); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px;">
                         <input type="checkbox" name="is_featured" value="1" <?= (!empty($post['is_featured']) || !empty($_POST['is_featured'])) ? 'checked' : '' ?>>
                         <div>
-                            <strong style="color: #fff; font-size: 0.88rem;"><i class="fas fa-star" style="color: var(--accent-amber);"></i> Lead Story (Hero Slider)</strong>
-                            <div style="font-size: 0.75rem; color: var(--text-dim);">Appears on homepage main slider</div>
+                            <strong style="color: var(--text-heading); font-size: 0.88rem;"><i class="fas fa-star" style="color: #D97706;"></i> Lead Story (Hero Slider)</strong>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Appears on homepage main slider</div>
                         </div>
                     </label>
 
-                    <label class="form-check">
+                    <label class="form-check" style="background: var(--bg-body); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px;">
                         <input type="checkbox" name="is_trending" value="1" <?= (!empty($post['is_trending']) || !empty($_POST['is_trending'])) ? 'checked' : '' ?>>
                         <div>
-                            <strong style="color: #fff; font-size: 0.88rem;"><i class="fas fa-fire" style="color: #f97316;"></i> Trending Story</strong>
-                            <div style="font-size: 0.75rem; color: var(--text-dim);">Appears top in trending list</div>
+                            <strong style="color: var(--text-heading); font-size: 0.88rem;"><i class="fas fa-fire" style="color: #f97316;"></i> Trending Story</strong>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Appears top in trending list</div>
                         </div>
                     </label>
+                </div>
 
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 6px;">
                     <?php if (!empty($isEditor) && $isEditor): ?>
-                        <div class="form-group" style="margin-top: 14px; margin-bottom: 0;">
+                        <div class="form-group" style="margin-bottom: 0;">
                             <label class="form-label">Author / Reporter</label>
                             <div style="background: var(--bg-body); border: 1.5px solid var(--border-color); border-radius: 8px; padding: 10px 12px; display: flex; align-items: center; gap: 10px;">
                                 <img src="<?= sanitize($currentUser['avatar']) ?>" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1.5px solid #38BDF8;">
@@ -420,7 +402,7 @@ require_once __DIR__ . '/includes/header.php';
                         $allUsersList = $pdo->query("SELECT id, name, designation, role FROM `users` WHERE `status` = 'active' ORDER BY `role` ASC, `name` ASC")->fetchAll(); 
                         $currentAuthorId = (int)($post['author_id'] ?? ($currentUser['id'] ?? 1));
                         ?>
-                        <div class="form-group" style="margin-top: 14px; margin-bottom: 0;">
+                        <div class="form-group" style="margin-bottom: 0;">
                             <label class="form-label" for="authorSelect">Assign Author</label>
                             <select name="author_id" id="authorSelect" class="form-control">
                                 <?php foreach ($allUsersList as $u): ?>
@@ -432,15 +414,32 @@ require_once __DIR__ . '/includes/header.php';
                         </div>
                     <?php endif; ?>
 
-                    <div class="form-group" style="margin-top: 14px; margin-bottom: 0;">
+                    <div class="form-group" style="margin-bottom: 0;">
                         <label class="form-label" for="postViews">View Count</label>
                         <input type="number" id="postViews" name="views" class="form-control" 
                                value="<?= (int)($post['views'] ?? ($_POST['views'] ?? 0)) ?>">
                     </div>
+                </div>
 
+            </div>
+        </div>
+
+        <!-- 5. Publish / Save Action Box (LAST AT THE VERY BOTTOM) -->
+        <div class="panel" style="border: 2px solid var(--primary); background: #FFF5F5;">
+            <div class="panel-header" style="background: var(--primary); color: #FFFFFF; padding: 14px 20px;">
+                <h2 class="panel-title" style="color: #FFFFFF;"><i class="fas fa-paper-plane"></i> Publish Action</h2>
+            </div>
+            <div class="panel-body" style="padding: 24px;">
+                <button type="submit" class="topbar-btn" style="width: 100%; justify-content: center; padding: 16px; font-size: 1.15rem; font-weight: 800; border-radius: 10px; box-shadow: 0 4px 14px rgba(227, 27, 35, 0.4);">
+                    <i class="fas fa-check-circle" style="font-size: 1.3rem;"></i> <?= $isEdit ? 'Save Changes' : 'Publish Article' ?>
+                </button>
+
+                <div style="margin-top: 16px; text-align: center;">
+                    <a href="/admin/posts.php" style="color: var(--text-muted); font-size: 0.9rem; text-decoration: none; font-weight: 600;">
+                        <i class="fas fa-arrow-left"></i> Back to Posts List
+                    </a>
                 </div>
             </div>
-
         </div>
 
     </div>
