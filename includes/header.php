@@ -3,6 +3,10 @@
  * Header Component
  * News 24 Himachal
  */
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 require_once __DIR__ . '/functions.php';
 
 $pdo = getDBConnection();
@@ -103,6 +107,15 @@ if (empty($ogImage)) {
                 <div class="top-links">
                     <a href="about.php">About Us</a>
                     <a href="contact.php">Contact Us</a>
+                    <?php if (!empty($_SESSION['admin_user'])): ?>
+                        <a href="admin/index.php" class="top-admin-link" style="color: #E31B23; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                            <i class="fas fa-gauge-high"></i> Dashboard
+                        </a>
+                    <?php else: ?>
+                        <a href="admin/login.php" class="top-admin-link" style="color: #E31B23; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                            <i class="fas fa-lock"></i> Admin Login
+                        </a>
+                    <?php endif; ?>
                 </div>
                 <div class="top-subscribe-wrap">
                     <button type="button" class="global-subscribe-btn not-subscribed" aria-label="Subscribe to News 24 Himachal">
