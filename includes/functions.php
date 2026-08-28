@@ -887,26 +887,25 @@ function getPastBulletins($pdo, $excludeId = 0, $limit = 6) {
 }
 
 /**
- * Normalize any video URL (YouTube watch, live, short, embed) into responsive embed iframe src
+ * Normalize any video URL (YouTube watch/live/short or Facebook video) into responsive embed iframe src
  */
 function normalizeVideoEmbedUrl($url) {
     $url = trim($url);
     if (empty($url)) {
-        return 'https://www.youtube.com/embed/live_stream?channel=default';
+        return 'https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Fshare%2Fv%2F1MJyM4wWgR%2F&show_text=false&autoplay=true&mute=1&loop=true&width=500';
     }
 
     // YouTube formats:
-    // https://www.youtube.com/watch?v=VIDEO_ID
-    // https://youtu.be/VIDEO_ID
-    // https://www.youtube.com/live/VIDEO_ID
-    // https://www.youtube.com/embed/VIDEO_ID
     if (preg_match('#(?:youtube\.com/(?:watch\?v=|live/|embed/)|youtu\.be/)([a-zA-Z0-9_-]{11})#i', $url, $matches)) {
-        return 'https://www.youtube-nocookie.com/embed/' . $matches[1] . '?autoplay=1&mute=0&rel=0&enablejsapi=1';
+        return 'https://www.youtube-nocookie.com/embed/' . $matches[1] . '?autoplay=1&mute=1&rel=0&enablejsapi=1';
     }
 
-    // If it's already an embed link (e.g. Facebook plugins or iframe src)
-    if (stripos($url, 'embed') !== false || stripos($url, 'plugins/video.php') !== false) {
-        return $url;
+    // Facebook formats:
+    if (stripos($url, 'facebook.com') !== false) {
+        if (stripos($url, 'plugins/video.php') !== false) {
+            return $url;
+        }
+        return 'https://www.facebook.com/plugins/video.php?href=' . urlencode($url) . '&show_text=false&autoplay=true&mute=1&loop=true&width=500';
     }
 
     return $url;

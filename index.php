@@ -124,7 +124,7 @@ $entertainmentNews = getNewsByCategorySlug($pdo, 'manoranjan', 3);
                         
                         <div class="livetv-screen">
                             <iframe 
-                                src="<?= sanitize(getSetting($pdo, 'livetv_url', 'https://www.youtube-nocookie.com/embed/5qap5aO4i9A?autoplay=1&mute=1&enablejsapi=1')) ?>" 
+                                src="<?= sanitize(normalizeVideoEmbedUrl(getSetting($pdo, 'livetv_url', 'https://www.facebook.com/share/v/1MJyM4wWgR/'))) ?>" 
                                 title="News 24 Himachal लाइव टीवी प्रसारण"
                                 allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" 
                                 allowfullscreen="true" 
