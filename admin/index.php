@@ -327,11 +327,6 @@ if ($isEditor) {
             <div class="stat-info">
                 <h4>कुल पाठक व्यूज (Views)</h4>
                 <div class="stat-number"><?= number_format($totalViews) ?></div>
-                <div style="margin-top: 4px;">
-                    <a href="reset-views.php" onclick="return confirm('क्या आप वाकई सभी खबरों के व्यूज काउंट को 0 पर रीसेट करना चाहते हैं? इसके बाद केवल नए लाइव विज़िटर्स के व्यूज गिने जाएंगे।');" style="font-size: 0.75rem; color: #DC2626; font-weight: 700; text-decoration: none;">
-                        <i class="fas fa-rotate-right"></i> व्यूज 0 रीसेट करें
-                    </a>
-                </div>
             </div>
             <div class="stat-icon-wrap stat-icon-blue">
                 <i class="fas fa-eye"></i>

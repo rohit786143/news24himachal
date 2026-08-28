@@ -869,4 +869,81 @@ function getYouTubeThumbnail($url) {
     return '/assets/images/video_placeholder.jpg';
 }
 
+/**
+ * Track Site Visitor Pageview (For Analytics & Daily Stats)
+ */
+function trackSiteVisitor($pdo, $pageTitle = null) {
+    if (!$pdo || php_sapi_name() === 'cli') return;
+    
+    $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
+    if (strpos($requestUri, '/admin') !== false || strpos($requestUri, '/api') !== false) {
+        return;
+    }
+
+    $ip = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+    if (strpos($ip, ',') !== false) {
+        $ip = trim(explode(',', $ip)[0]);
+    }
+
+    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    
+    // Detect Device Type
+    $deviceType = 'Desktop';
+    if (preg_match('/(tablet|ipad|playbook)|(android(?!.*(mobi|opera mini)))/i', $userAgent)) {
+        $deviceType = 'Tablet';
+    } elseif (preg_match('/(up.browser|up.link|mmp|symbian|smartphone|midp|wap|phone|android|iemobile|iphone)/i', $userAgent)) {
+        $deviceType = 'Mobile';
+    }
+
+    // Detect Browser
+    $browser = 'Other';
+    if (preg_match('/edg/i', $userAgent)) $browser = 'Edge';
+    elseif (preg_match('/chrome|crios/i', $userAgent)) $browser = 'Chrome';
+    elseif (preg_match('/firefox|fxios/i', $userAgent)) $browser = 'Firefox';
+    elseif (preg_match('/safari/i', $userAgent)) $browser = 'Safari';
+    elseif (preg_match('/opera|opr/i', $userAgent)) $browser = 'Opera';
+
+    // Detect OS
+    $os = 'Other';
+    if (preg_match('/windows/i', $userAgent)) $os = 'Windows';
+    elseif (preg_match('/android/i', $userAgent)) $os = 'Android';
+    elseif (preg_match('/iphone|ipad|ipod/i', $userAgent)) $os = 'iOS';
+    elseif (preg_match('/macintosh|mac os x/i', $userAgent)) $os = 'macOS';
+    elseif (preg_match('/linux/i', $userAgent)) $os = 'Linux';
+
+    $referrer = $_SERVER['HTTP_REFERER'] ?? '';
+    $visitDate = date('Y-m-d');
+    $title = $pageTitle ?? 'News 24 Himachal';
+
+    try {
+        $stmt = $pdo->prepare("
+            INSERT INTO `site_visitors` (`visitor_ip`, `page_url`, `page_title`, `device_type`, `browser`, `os`, `referrer`, `visit_date`, `visited_at`)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+        ");
+        $stmt->execute([$ip, mb_substr($requestUri, 0, 500), mb_substr($title, 0, 255), $deviceType, $browser, $os, mb_substr($referrer, 0, 500), $visitDate]);
+    } catch (PDOException $e) {
+        // Create table automatically if it does not exist
+        if ($e->getCode() == '42S02' || strpos($e->getMessage(), "site_visitors' doesn't exist") !== false) {
+            $pdo->exec("
+                CREATE TABLE IF NOT EXISTS `site_visitors` (
+                    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+                    `visitor_ip` VARCHAR(45) NOT NULL,
+                    `page_url` VARCHAR(500) NOT NULL,
+                    `page_title` VARCHAR(255) NULL,
+                    `device_type` VARCHAR(30) DEFAULT 'Desktop',
+                    `browser` VARCHAR(50) DEFAULT 'Chrome',
+                    `os` VARCHAR(50) DEFAULT 'Windows',
+                    `referrer` VARCHAR(500) NULL,
+                    `visit_date` DATE NOT NULL,
+                    `visited_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX `idx_visit_date` (`visit_date`),
+                    INDEX `idx_visit_ip_date` (`visitor_ip`, `visit_date`),
+                    INDEX `idx_device` (`device_type`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+            ");
+        }
+    }
+}
+
+
 

@@ -892,37 +892,44 @@ if (isset($_SERVER['REQUEST_URI']) && preg_match('#^/admin(\?.*)?$#i', $_SERVER[
                      ========================================== -->
                 <span class="menu-label">मुख्य मेनू</span>
                 
-                <a href="/admin/index.php" class="nav-item <?= $currentPage === 'index.php' ? 'active' : '' ?>">
+                <a href="index.php" class="nav-item <?= $currentPage === 'index.php' ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-chart-pie"></i>
                         <span>डैशबोर्ड (Dashboard)</span>
                     </div>
                 </a>
 
+                <a href="visitors.php" class="nav-item <?= $currentPage === 'visitors.php' ? 'active' : '' ?>">
+                    <div class="nav-item-content">
+                        <i class="fas fa-chart-line" style="color: #38BDF8;"></i>
+                        <span>दैनिक विज़िटर्स (Visitors & Traffic)</span>
+                    </div>
+                </a>
+
                 <span class="menu-label">समाचार सामग्री (News CMS)</span>
 
-                <a href="/admin/posts.php" class="nav-item <?= in_array($currentPage, ['posts.php']) ? 'active' : '' ?>">
+                <a href="posts.php" class="nav-item <?= in_array($currentPage, ['posts.php']) ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-file-lines"></i>
                         <span>सभी खबरें (All Posts)</span>
                     </div>
                 </a>
 
-                <a href="/admin/post-edit.php" class="nav-item <?= in_array($currentPage, ['post-edit.php']) && !isset($_GET['id']) ? 'active' : '' ?>">
+                <a href="post-edit.php" class="nav-item <?= in_array($currentPage, ['post-edit.php']) && !isset($_GET['id']) ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-plus-circle"></i>
                         <span>नई खबर जोड़ें (Add Post)</span>
                     </div>
                 </a>
 
-                <a href="/admin/categories.php" class="nav-item <?= $currentPage === 'categories.php' ? 'active' : '' ?>">
+                <a href="categories.php" class="nav-item <?= $currentPage === 'categories.php' ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-folder-tree"></i>
                         <span>श्रेणियां (Categories)</span>
                     </div>
                 </a>
 
-                <a href="/admin/live-bulletins.php" class="nav-item <?= $currentPage === 'live-bulletins.php' ? 'active' : '' ?>">
+                <a href="live-bulletins.php" class="nav-item <?= $currentPage === 'live-bulletins.php' ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-tower-broadcast" style="color: var(--primary-red);"></i>
                         <span>लाइव बुलेटिन (Live Stream)</span>
@@ -931,7 +938,7 @@ if (isset($_SERVER['REQUEST_URI']) && preg_match('#^/admin(\?.*)?$#i', $_SERVER[
 
                 <span class="menu-label">संपादक एवं उपयोगकर्ता</span>
 
-                <a href="/admin/users.php" class="nav-item <?= in_array($currentPage, ['users.php', 'user-edit.php']) ? 'active' : '' ?>">
+                <a href="users.php" class="nav-item <?= in_array($currentPage, ['users.php', 'user-edit.php']) ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-users-viewfinder"></i>
                         <span>संपादक / यूज़र्स (Editors)</span>
@@ -943,28 +950,28 @@ if (isset($_SERVER['REQUEST_URI']) && preg_match('#^/admin(\?.*)?$#i', $_SERVER[
 
                 <span class="menu-label">पेज एवं वेबसाइट सेटिंग</span>
 
-                <a href="/admin/pages.php" class="nav-item <?= in_array($currentPage, ['pages.php', 'page-edit.php']) ? 'active' : '' ?>">
+                <a href="pages.php" class="nav-item <?= in_array($currentPage, ['pages.php', 'page-edit.php']) ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-book-open"></i>
                         <span>पेज CMS (About, Terms...)</span>
                     </div>
                 </a>
 
-                <a href="/admin/settings.php" class="nav-item <?= $currentPage === 'settings.php' ? 'active' : '' ?>">
+                <a href="settings.php" class="nav-item <?= $currentPage === 'settings.php' ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-sliders"></i>
                         <span>साइट सेटिंग्स (Settings)</span>
                     </div>
                 </a>
 
-                <a href="/admin/advertisements.php" class="nav-item <?= $currentPage === 'advertisements.php' ? 'active' : '' ?>">
+                <a href="advertisements.php" class="nav-item <?= $currentPage === 'advertisements.php' ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-rectangle-ad"></i>
                         <span>विज्ञापन प्रबंधन (Ads)</span>
                     </div>
                 </a>
 
-                <a href="/admin/messages.php" class="nav-item <?= $currentPage === 'messages.php' ? 'active' : '' ?>">
+                <a href="messages.php" class="nav-item <?= $currentPage === 'messages.php' ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-envelope-open-text"></i>
                         <span>संपर्क संदेश (Messages)</span>
@@ -976,14 +983,14 @@ if (isset($_SERVER['REQUEST_URI']) && preg_match('#^/admin(\?.*)?$#i', $_SERVER[
 
                 <span class="menu-label">अलर्ट एवं यूज़र्स</span>
 
-                <a href="/admin/notifications.php" class="nav-item <?= $currentPage === 'notifications.php' ? 'active' : '' ?>">
+                <a href="notifications.php" class="nav-item <?= $currentPage === 'notifications.php' ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-bell"></i>
                         <span>पुश नोटिफिकेशन (Alerts)</span>
                     </div>
                 </a>
 
-                <a href="/admin/subscribers.php" class="nav-item <?= $currentPage === 'subscribers.php' ? 'active' : '' ?>">
+                <a href="subscribers.php" class="nav-item <?= $currentPage === 'subscribers.php' ? 'active' : '' ?>">
                     <div class="nav-item-content">
                         <i class="fas fa-users-gear"></i>
                         <span>सब्सक्राइबर्स (Subscribers)</span>
@@ -996,7 +1003,7 @@ if (isset($_SERVER['REQUEST_URI']) && preg_match('#^/admin(\?.*)?$#i', $_SERVER[
         </nav>
 
         <div class="sidebar-footer">
-            <a href="/index.php" target="_blank" class="view-site-btn">
+            <a href="<?= defined('APP_URL') ? APP_URL : '/' ?>" target="_blank" class="view-site-btn">
                 <i class="fas fa-arrow-up-right-from-square"></i>
                 <span>वेबसाइट लाइव देखें</span>
             </a>

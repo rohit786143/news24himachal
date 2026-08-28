@@ -8,6 +8,9 @@ require_once __DIR__ . '/functions.php';
 $pdo = getDBConnection();
 $pageTitle = $pageTitle ?? 'News 24 Himachal - हिमाचल प्रदेश का प्रमुख हिंदी समाचार पोर्टल';
 $pageDescription = $pageDescription ?? 'News 24 Himachal - ब्रेकिंग न्यूज़, शिमला, कांगड़ा, मंडी, देवभूमि दर्शन, राजनीति, संस्कृति और ताज़ा खबरें।';
+
+// Track unique visitor & pageview
+trackSiteVisitor($pdo, $pageTitle);
 ?>
 <!DOCTYPE html>
 <html lang="hi">
