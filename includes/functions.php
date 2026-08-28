@@ -245,68 +245,52 @@ function getFeaturedHeroNews($pdo) {
 }
 
 /**
- * Get Latest "सबसे बड़ी खबर" News Items (Top 3 for Interactive Auto-Slider)
+ * Get Latest News Items for Hero Slider (Top 3 Latest Published Posts)
  */
 function getSabseBadiKhabarNews($pdo, $limit = 3) {
     try {
         $stmt = $pdo->prepare("
-            SELECT n.*, c.name AS category_name, c.slug AS category_slug, 
+            SELECT n.*, 
+                   COALESCE(c.name, 'ताज़ा खबर') AS category_name, 
+                   COALESCE(c.slug, 'himachal') AS category_slug, 
                    sub.name AS subcategory_name, sub.slug AS subcategory_slug
             FROM news n
-            JOIN categories c ON n.category_id = c.id
+            LEFT JOIN categories c ON n.category_id = c.id
             LEFT JOIN categories sub ON n.subcategory_id = sub.id
-            WHERE sub.slug = 'sabse-badi-khabar' OR c.slug = 'sabse-badi-khabar' OR n.is_featured = 1
-            ORDER BY (sub.slug = 'sabse-badi-khabar') DESC, (n.is_featured = 1) DESC, n.created_at DESC
+            ORDER BY n.created_at DESC
             LIMIT ?
         ");
         $stmt->bindValue(1, (int)$limit, PDO::PARAM_INT);
         $stmt->execute();
-        $articles = $stmt->fetchAll();
-
-        // If less than limit, supplement with latest news to guarantee full 3-slide carousel
-        if (count($articles) < $limit) {
-            $excludeIds = array_column($articles, 'id');
-            $placeholders = empty($excludeIds) ? '0' : implode(',', array_map('intval', $excludeIds));
-            $needed = $limit - count($articles);
-            
-            $fallback = $pdo->prepare("
-                SELECT n.*, c.name AS category_name, c.slug AS category_slug, 
-                       sub.name AS subcategory_name, sub.slug AS subcategory_slug
-                FROM news n
-                JOIN categories c ON n.category_id = c.id
-                LEFT JOIN categories sub ON n.subcategory_id = sub.id
-                WHERE n.id NOT IN ($placeholders)
-                ORDER BY n.is_breaking DESC, n.created_at DESC
-                LIMIT ?
-            ");
-            $fallback->bindValue(1, (int)$needed, PDO::PARAM_INT);
-            $fallback->execute();
-            $moreArticles = $fallback->fetchAll();
-            $articles = array_merge($articles, $moreArticles);
-        }
-
-        return $articles;
+        return $stmt->fetchAll();
     } catch (PDOException $e) {
         return [];
     }
 }
 
 /**
- * Get Hero Trending News (4 Cards for Right Column)
+ * Get Hero Trending News (4 Cards next to Latest News Slider)
  */
-function getTrendingNews($pdo, $limit = 4, $excludeId = 0) {
+function getTrendingNews($pdo, $limit = 4, $excludeIds = []) {
     try {
+        if (!is_array($excludeIds)) {
+            $excludeIds = $excludeIds > 0 ? [$excludeIds] : [];
+        }
+        $placeholders = empty($excludeIds) ? '0' : implode(',', array_map('intval', $excludeIds));
+
         $stmt = $pdo->prepare("
-            SELECT n.*, c.name AS category_name, c.slug AS category_slug, sub.name AS subcategory_name, sub.slug AS subcategory_slug
+            SELECT n.*, 
+                   COALESCE(c.name, 'ताज़ा खबर') AS category_name, 
+                   COALESCE(c.slug, 'himachal') AS category_slug, 
+                   sub.name AS subcategory_name, sub.slug AS subcategory_slug
             FROM news n
-            JOIN categories c ON n.category_id = c.id
+            LEFT JOIN categories c ON n.category_id = c.id
             LEFT JOIN categories sub ON n.subcategory_id = sub.id
-            WHERE n.id != ?
-            ORDER BY (n.is_trending * 2 + n.views) DESC, n.created_at DESC
+            WHERE n.id NOT IN ($placeholders)
+            ORDER BY (n.is_trending * 2 + n.is_breaking) DESC, n.created_at DESC
             LIMIT ?
         ");
-        $stmt->bindValue(1, (int)$excludeId, PDO::PARAM_INT);
-        $stmt->bindValue(2, (int)$limit, PDO::PARAM_INT);
+        $stmt->bindValue(1, (int)$limit, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll();
     } catch (PDOException $e) {

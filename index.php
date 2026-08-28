@@ -12,10 +12,9 @@ $pageDescription = 'News 24 Himachal - हिमाचल प्रदेश क
 
 require_once __DIR__ . '/includes/header.php';
 
-// Fetch Hero Data (Top 3 "सबसे बड़ी खबर" for Auto-Slider + 4 Trending + Live TV)
-$sabseBadiKhabarList = getSabseBadiKhabarNews($pdo, 3);
-$featuredNews = $sabseBadiKhabarList[0] ?? null;
-$trendingNews = getTrendingNews($pdo, 4, $featuredNews['id'] ?? 0);
+// Fetch Hero Data (Top 3 "Latest News" for Auto-Slider + 4 Trending + Live TV)
+$latestNewsList = getSabseBadiKhabarNews($pdo, 3);
+$trendingNews = getTrendingNews($pdo, 4, array_column($latestNewsList, 'id'));
 
 // Fetch Category Blocks Data (4 Major Districts: Shimla, Mandi, Kullu, Kangra - 4 items each)
 $shimlaNews = getNewsByCategorySlug($pdo, 'himachal-news', 4, 0, 'shimla');
@@ -31,21 +30,21 @@ $entertainmentNews = getNewsByCategorySlug($pdo, 'manoranjan', 3);
 ?>
 
 <main>
-    <!-- Hero Section (Split Layout: 1 Interactive Slider 'सबसे बड़ी खबर' + 4 Trending + Live TV) -->
+    <!-- Hero Section (Split Layout: 1 Interactive Slider 'Latest News' + 4 Trending + Live TV) -->
     <section class="hero-section">
         <div class="container">
             <div class="hero-grid">
                 
-                <!-- Left: Big Lead Carousel ("सबसे बड़ी खबर" - Top 3 Sub-category Slider) -->
-                <?php if (!empty($sabseBadiKhabarList)): ?>
+                <!-- Left: Big Lead Carousel ("Latest News" - Top 3 Latest Published Articles) -->
+                <?php if (!empty($latestNewsList)): ?>
                 <div class="lead-col-container">
                     <div class="hero-block-heading">
-                        <span class="hero-block-badge"><i class="fas fa-bolt"></i> सबसे बड़ी खबर</span>
+                        <span class="hero-block-badge"><i class="fas fa-bolt"></i> Latest News</span>
                         <div class="lead-slider-controls-top">
                             <button type="button" class="lead-slider-arrow prev" id="leadPrevBtn" aria-label="पिछली खबर" title="पिछली खबर">
                                 <i class="fas fa-chevron-left"></i>
                             </button>
-                            <span class="lead-slider-counter"><span id="leadSlideCurrent">1</span>/<?= count($sabseBadiKhabarList) ?></span>
+                            <span class="lead-slider-counter"><span id="leadSlideCurrent">1</span>/<?= count($latestNewsList) ?></span>
                             <button type="button" class="lead-slider-arrow next" id="leadNextBtn" aria-label="अगली खबर" title="अगली खबर">
                                 <i class="fas fa-chevron-right"></i>
                             </button>
@@ -54,7 +53,7 @@ $entertainmentNews = getNewsByCategorySlug($pdo, 'manoranjan', 3);
 
                     <div class="lead-slider-container" id="sabseBadiKhabarSlider" data-autoplay-interval="4500">
                         <div class="lead-slider-track">
-                            <?php foreach ($sabseBadiKhabarList as $index => $item): ?>
+                            <?php foreach ($latestNewsList as $index => $item): ?>
                             <div class="lead-slide <?= $index === 0 ? 'active' : '' ?>" data-index="<?= $index ?>">
                                 <div class="lead-story-card">
                                     <!-- Clean Thumbnail Image (With District Badge on top-right) -->
@@ -87,7 +86,7 @@ $entertainmentNews = getNewsByCategorySlug($pdo, 'manoranjan', 3);
 
                         <!-- Progress / Pagination Indicator Dots -->
                         <div class="lead-slider-dots">
-                            <?php foreach ($sabseBadiKhabarList as $index => $item): ?>
+                            <?php foreach ($latestNewsList as $index => $item): ?>
                             <button type="button" class="lead-dot <?= $index === 0 ? 'active' : '' ?>" data-slide="<?= $index ?>" aria-label="Slide <?= $index + 1 ?>"></button>
                             <?php endforeach; ?>
                         </div>
