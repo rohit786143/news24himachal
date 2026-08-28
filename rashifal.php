@@ -267,12 +267,12 @@ require_once __DIR__ . '/includes/header.php';
         </div>
     </section>
 
-    <!-- Main Content & Aspect Cards -->
+    <!-- Main Content & Aspect Cards (Full Width Layout - No Sidebar) -->
     <div class="main-layout" style="padding: 15px 0 60px;">
-        <div class="container content-grid">
+        <div class="container" style="max-width: 1050px; margin: 0 auto;">
             
-            <!-- Left Column: 12 Rashi Detail Cards -->
-            <div class="main-content-column">
+            <!-- Full Width Column: 12 Rashi Detail Cards -->
+            <div style="width: 100%;">
                 
                 <div class="rashi-cards-container">
                     <?php foreach ($rashifalList as $r): ?>
@@ -449,11 +449,6 @@ require_once __DIR__ . '/includes/header.php';
                     </div>
                 <?php endif; ?>
 
-            </div>
-
-            <!-- Right Column: Sidebar -->
-            <div class="sidebar-column">
-                <?php require_once __DIR__ . '/includes/sidebar.php'; ?>
             </div>
 
         </div>
