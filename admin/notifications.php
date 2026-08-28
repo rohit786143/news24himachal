@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     if (!empty($title) && !empty($msgBody)) {
         if (empty($url)) {
-            $url = 'http://localhost:8000';
+            $url = defined('APP_URL') ? APP_URL : 'https://news24hp.com';
         }
 
         $cntStmt = $pdo->query("SELECT COUNT(*) FROM `subscribers` WHERE `status` = 'active'");
@@ -91,7 +91,7 @@ $history = $pdo->query("
                                 <option value="<?= $rn['id'] ?>" 
                                         data-title="<?= htmlspecialchars($rn['title'], ENT_QUOTES) ?>"
                                         data-excerpt="<?= htmlspecialchars($rn['excerpt'] ?? '', ENT_QUOTES) ?>"
-                                        data-url="http://localhost:8000/article.php?slug=<?= urlencode($rn['slug']) ?>"
+                                        data-url="<?= (defined('APP_URL') ? APP_URL : 'https://news24hp.com') ?>/article.php?slug=<?= urlencode($rn['slug']) ?>"
                                         data-image="<?= htmlspecialchars($rn['image_url'], ENT_QUOTES) ?>"
                                         data-cat="<?= htmlspecialchars($rn['category_name'] ?? 'ब्रेकिंग', ENT_QUOTES) ?>">
                                     [<?= sanitize($rn['category_name']) ?>] <?= sanitize(mb_substr($rn['title'], 0, 55)) ?>...
@@ -123,7 +123,7 @@ $history = $pdo->query("
                         <label class="form-label" for="notifUrl">
                             टारगेट URL (क्लिक करने पर खुलने वाला लिंक)
                         </label>
-                        <input type="url" id="notifUrl" name="url" class="form-control" placeholder="http://localhost:8000/article.php?slug=..." value="http://localhost:8000">
+                        <input type="url" id="notifUrl" name="url" class="form-control" placeholder="<?= (defined('APP_URL') ? APP_URL : 'https://news24hp.com') ?>/article.php?slug=..." value="<?= (defined('APP_URL') ? APP_URL : 'https://news24hp.com') ?>">
                     </div>
 
                     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
