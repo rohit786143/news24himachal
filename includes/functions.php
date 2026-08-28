@@ -429,6 +429,55 @@ function getRecentNews($pdo, $limit = 5) {
 }
 
 /**
+ * Get Chief Admin Avatar Fallback
+ */
+function getAdminAvatar($pdo) {
+    static $adminAvatar = null;
+    if ($adminAvatar === null && $pdo) {
+        try {
+            $stmt = $pdo->query("SELECT avatar FROM `users` WHERE `role` = 'admin' AND `avatar` IS NOT NULL AND `avatar` != '' ORDER BY `id` ASC LIMIT 1");
+            $adminAvatar = $stmt ? $stmt->fetchColumn() : null;
+        } catch (Exception $e) {}
+        if (empty($adminAvatar)) {
+            $adminAvatar = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80';
+        }
+    }
+    return $adminAvatar ?? 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80';
+}
+
+/**
+ * Auto Sync Legacy Author Posts to Chief Admin User ID
+ */
+function syncLegacyAuthorPosts($pdo) {
+    static $synced = false;
+    if ($synced || !$pdo) return;
+    $synced = true;
+
+    try {
+        // Ensure author_id column exists
+        $colCheck = $pdo->query("SHOW COLUMNS FROM `news` LIKE 'author_id'")->fetch();
+        if (!$colCheck) {
+            $pdo->exec("ALTER TABLE `news` ADD COLUMN `author_id` INT NULL AFTER `author`");
+        }
+
+        // Fetch Chief Admin User
+        $adminUser = $pdo->query("SELECT id, name FROM `users` WHERE `role` = 'admin' AND `status` = 'active' ORDER BY `id` ASC LIMIT 1")->fetch();
+        if ($adminUser) {
+            $adminId = (int)$adminUser['id'];
+            $adminName = $adminUser['name'];
+
+            // Assign admin ID to all posts where author_id is missing
+            $update = $pdo->prepare("
+                UPDATE `news` 
+                SET `author_id` = ?, `author` = ?
+                WHERE `author_id` IS NULL OR `author_id` = 0
+            ");
+            $update->execute([$adminId, $adminName]);
+        }
+    } catch (Exception $e) {}
+}
+
+/**
  * Get Full Article by Slug or ID
  */
 function getArticleBySlug($pdo, $slug) {
